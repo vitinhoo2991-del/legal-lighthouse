@@ -36,6 +36,13 @@
       "when": 1788909545316,
       "tag": "0004_multiatendimento",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788910251455,
+      "tag": "0005_crm_pipeline",
+      "breakpoints": true
     }
   ]
 }

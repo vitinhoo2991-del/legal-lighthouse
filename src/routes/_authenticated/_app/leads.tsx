@@ -681,16 +681,31 @@ function LeadDetailSheet({
               </div>
             </section>
 
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={() =>
-                navigate({ to: lead.whatsapp_conversation_id ? "/whatsapp" : "/atendimento-ia" })
-              }
-            >
-              <MessageSquare className="h-4 w-4" />
-              Abrir conversa original
-            </Button>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() =>
+                  navigate({
+                    to: lead.whatsapp_conversation_id ? "/atendimento" : "/atendimento-ia",
+                  })
+                }
+              >
+                <MessageSquare className="h-4 w-4" />
+                Abrir conversa original
+              </Button>
+              <Button
+                className="w-full gap-2"
+                disabled={opportunityMutation.isPending}
+                onClick={() => opportunityMutation.mutate()}
+              >
+                {opportunityMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Criar oportunidade
+              </Button>
+            </div>
+
 
             {history.length ? (
               <section className="space-y-2">

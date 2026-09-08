@@ -735,7 +735,7 @@ function LeadDetailSheet({
             <section className="rounded-xl border border-border bg-surface/60 p-4">
               <UpcomingEvents
                 leadId={lead.id}
-                contactId={lead.contact_id ?? null}
+                contactId={(lead as any).contact_id ?? null}
                 conversationId={lead.whatsapp_conversation_id ?? null}
                 title="Agendar atendimento"
                 eventType="consulta"

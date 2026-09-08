@@ -18,12 +18,16 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/_app'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/_app/agenda'
+import { Route as AuthenticatedAppAgentesIaRouteImport } from './routes/_authenticated/_app/agentes-ia'
 import { Route as AuthenticatedAppAtendimentoRouteImport } from './routes/_authenticated/_app/atendimento'
+import { Route as AuthenticatedAppBaseConhecimentoRouteImport } from './routes/_authenticated/_app/base-conhecimento'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/_app/clientes'
+import { Route as AuthenticatedAppCopilotoRouteImport } from './routes/_authenticated/_app/copiloto'
 import { Route as AuthenticatedAppCrmRouteImport } from './routes/_authenticated/_app/crm'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppDocumentosRouteImport } from './routes/_authenticated/_app/documentos'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/_app/financeiro'
+import { Route as AuthenticatedAppIaRouteImport } from './routes/_authenticated/_app/ia'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/_app/leads'
 import { Route as AuthenticatedAppProcessosRouteImport } from './routes/_authenticated/_app/processos'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/_app/relatorios'
@@ -72,16 +76,34 @@ const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppAgentesIaRoute =
+  AuthenticatedAppAgentesIaRouteImport.update({
+    id: '/agentes-ia',
+    path: '/agentes-ia',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppAtendimentoRoute =
   AuthenticatedAppAtendimentoRouteImport.update({
     id: '/atendimento',
     path: '/atendimento',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppBaseConhecimentoRoute =
+  AuthenticatedAppBaseConhecimentoRouteImport.update({
+    id: '/base-conhecimento',
+    path: '/base-conhecimento',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppClientesRoute =
   AuthenticatedAppClientesRouteImport.update({
     id: '/clientes',
     path: '/clientes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCopilotoRoute =
+  AuthenticatedAppCopilotoRouteImport.update({
+    id: '/copiloto',
+    path: '/copiloto',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppCrmRoute = AuthenticatedAppCrmRouteImport.update({
@@ -107,6 +129,11 @@ const AuthenticatedAppFinanceiroRoute =
     path: '/financeiro',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppIaRoute = AuthenticatedAppIaRouteImport.update({
+  id: '/ia',
+  path: '/ia',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -139,12 +166,16 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/agenda': typeof AuthenticatedAppAgendaRoute
+  '/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
+  '/copiloto': typeof AuthenticatedAppCopilotoRoute
   '/crm': typeof AuthenticatedAppCrmRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/documentos': typeof AuthenticatedAppDocumentosRoute
   '/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/ia': typeof AuthenticatedAppIaRoute
   '/leads': typeof AuthenticatedAppLeadsRoute
   '/processos': typeof AuthenticatedAppProcessosRoute
   '/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -158,12 +189,16 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/agenda': typeof AuthenticatedAppAgendaRoute
+  '/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
+  '/copiloto': typeof AuthenticatedAppCopilotoRoute
   '/crm': typeof AuthenticatedAppCrmRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
   '/documentos': typeof AuthenticatedAppDocumentosRoute
   '/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/ia': typeof AuthenticatedAppIaRoute
   '/leads': typeof AuthenticatedAppLeadsRoute
   '/processos': typeof AuthenticatedAppProcessosRoute
   '/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -180,12 +215,16 @@ export interface FileRoutesById {
   '/_authenticated/_app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/_app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/_authenticated/_app/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/_authenticated/_app/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/_authenticated/_app/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/_authenticated/_app/clientes': typeof AuthenticatedAppClientesRoute
+  '/_authenticated/_app/copiloto': typeof AuthenticatedAppCopilotoRoute
   '/_authenticated/_app/crm': typeof AuthenticatedAppCrmRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/_app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/_authenticated/_app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/_authenticated/_app/ia': typeof AuthenticatedAppIaRoute
   '/_authenticated/_app/leads': typeof AuthenticatedAppLeadsRoute
   '/_authenticated/_app/processos': typeof AuthenticatedAppProcessosRoute
   '/_authenticated/_app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -201,12 +240,16 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/onboarding'
     | '/agenda'
+    | '/agentes-ia'
     | '/atendimento'
+    | '/base-conhecimento'
     | '/clientes'
+    | '/copiloto'
     | '/crm'
     | '/dashboard'
     | '/documentos'
     | '/financeiro'
+    | '/ia'
     | '/leads'
     | '/processos'
     | '/relatorios'
@@ -220,12 +263,16 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/onboarding'
     | '/agenda'
+    | '/agentes-ia'
     | '/atendimento'
+    | '/base-conhecimento'
     | '/clientes'
+    | '/copiloto'
     | '/crm'
     | '/dashboard'
     | '/documentos'
     | '/financeiro'
+    | '/ia'
     | '/leads'
     | '/processos'
     | '/relatorios'
@@ -241,12 +288,16 @@ export interface FileRouteTypes {
     | '/_authenticated/_app'
     | '/_authenticated/onboarding'
     | '/_authenticated/_app/agenda'
+    | '/_authenticated/_app/agentes-ia'
     | '/_authenticated/_app/atendimento'
+    | '/_authenticated/_app/base-conhecimento'
     | '/_authenticated/_app/clientes'
+    | '/_authenticated/_app/copiloto'
     | '/_authenticated/_app/crm'
     | '/_authenticated/_app/dashboard'
     | '/_authenticated/_app/documentos'
     | '/_authenticated/_app/financeiro'
+    | '/_authenticated/_app/ia'
     | '/_authenticated/_app/leads'
     | '/_authenticated/_app/processos'
     | '/_authenticated/_app/relatorios'
@@ -327,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/_app/agentes-ia': {
+      id: '/_authenticated/_app/agentes-ia'
+      path: '/agentes-ia'
+      fullPath: '/agentes-ia'
+      preLoaderRoute: typeof AuthenticatedAppAgentesIaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/atendimento': {
       id: '/_authenticated/_app/atendimento'
       path: '/atendimento'
@@ -334,11 +392,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAtendimentoRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/_app/base-conhecimento': {
+      id: '/_authenticated/_app/base-conhecimento'
+      path: '/base-conhecimento'
+      fullPath: '/base-conhecimento'
+      preLoaderRoute: typeof AuthenticatedAppBaseConhecimentoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/clientes': {
       id: '/_authenticated/_app/clientes'
       path: '/clientes'
       fullPath: '/clientes'
       preLoaderRoute: typeof AuthenticatedAppClientesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/copiloto': {
+      id: '/_authenticated/_app/copiloto'
+      path: '/copiloto'
+      fullPath: '/copiloto'
+      preLoaderRoute: typeof AuthenticatedAppCopilotoRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/_app/crm': {
@@ -367,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/financeiro'
       fullPath: '/financeiro'
       preLoaderRoute: typeof AuthenticatedAppFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/ia': {
+      id: '/_authenticated/_app/ia'
+      path: '/ia'
+      fullPath: '/ia'
+      preLoaderRoute: typeof AuthenticatedAppIaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/_app/leads': {
@@ -402,12 +481,16 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
+  AuthenticatedAppAgentesIaRoute: typeof AuthenticatedAppAgentesIaRoute
   AuthenticatedAppAtendimentoRoute: typeof AuthenticatedAppAtendimentoRoute
+  AuthenticatedAppBaseConhecimentoRoute: typeof AuthenticatedAppBaseConhecimentoRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
+  AuthenticatedAppCopilotoRoute: typeof AuthenticatedAppCopilotoRoute
   AuthenticatedAppCrmRoute: typeof AuthenticatedAppCrmRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppDocumentosRoute: typeof AuthenticatedAppDocumentosRoute
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
+  AuthenticatedAppIaRoute: typeof AuthenticatedAppIaRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
   AuthenticatedAppProcessosRoute: typeof AuthenticatedAppProcessosRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
@@ -416,12 +499,16 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
+  AuthenticatedAppAgentesIaRoute: AuthenticatedAppAgentesIaRoute,
   AuthenticatedAppAtendimentoRoute: AuthenticatedAppAtendimentoRoute,
+  AuthenticatedAppBaseConhecimentoRoute: AuthenticatedAppBaseConhecimentoRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
+  AuthenticatedAppCopilotoRoute: AuthenticatedAppCopilotoRoute,
   AuthenticatedAppCrmRoute: AuthenticatedAppCrmRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppDocumentosRoute: AuthenticatedAppDocumentosRoute,
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
+  AuthenticatedAppIaRoute: AuthenticatedAppIaRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
   AuthenticatedAppProcessosRoute: AuthenticatedAppProcessosRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,

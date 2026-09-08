@@ -101,6 +101,9 @@ export function friendlyAuthError(message?: string) {
   if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
   if (m.includes("already registered") || m.includes("already been registered"))
     return "Já existe uma conta com este e-mail.";
+  if (m.includes("pwned") || m.includes("compromised") || m.includes("leaked"))
+    return "Esta senha já apareceu em vazamentos públicos. Escolha outra.";
+  if (m.includes("weak")) return "Escolha uma senha mais forte, com letras, números e símbolos.";
   if (m.includes("password")) return "A senha precisa ter pelo menos 8 caracteres.";
   if (m.includes("rate limit") || m.includes("too many"))
     return "Muitas tentativas. Aguarde alguns instantes.";

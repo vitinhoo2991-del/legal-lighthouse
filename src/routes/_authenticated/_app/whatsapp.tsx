@@ -123,7 +123,7 @@ function WhatsappPage() {
 
   const verifyTokenQuery = useQuery({
     queryKey: ["wa-verify-token"],
-    enabled: canEdit && Boolean(overview?.hasCredentials),
+    enabled: canEdit,
     queryFn: () => fetchVerifyToken(),
   });
 

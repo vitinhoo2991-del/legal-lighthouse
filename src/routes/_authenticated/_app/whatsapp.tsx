@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -450,248 +450,23 @@ function WhatsappPage() {
           </div>
         </TabsContent>
 
-        {/* ---------------- CONVERSAS ---------------- */}
+        {/* Conversas vivem agora na Central de Atendimento (multiatendimento). */}
         <TabsContent value="conversas">
-          <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)_260px]">
-            <section
-              className={`surface-panel flex max-h-[620px] flex-col p-4 ${activeId ? "hidden lg:flex" : "flex"}`}
-            >
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar nome, telefone ou mensagem"
-                  className="pl-9 text-sm"
-                />
-              </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.value}
-                    type="button"
-                    onClick={() => setFilter(f.value)}
-                    className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                      filter === f.value
-                        ? "border-primary/40 bg-primary-soft text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/30"
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-3 flex-1 space-y-2 overflow-y-auto">
-                {conversationsQuery.isLoading ? (
-                  <p className="p-4 text-center text-xs text-muted-foreground">Carregando...</p>
-                ) : (conversationsQuery.data ?? []).length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                    Nenhuma conversa ainda. As mensagens aparecem aqui assim que o WhatsApp oficial
-                    estiver conectado e um cliente escrever para o escritório.
-                  </p>
-                ) : (
-                  conversationsQuery.data!.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setActiveId(c.id)}
-                      className={`w-full rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                        c.id === activeId
-                          ? "border-primary/40 bg-primary-soft/60"
-                          : "border-border hover:border-primary/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
-                          {(c.contact?.name ?? c.contact?.profile_name ?? "?").slice(0, 1).toUpperCase()}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-1 text-sm font-medium">
-                            {c.contact?.name ?? c.contact?.profile_name ?? c.contact?.phone_number}
-                          </p>
-                          <p className="line-clamp-1 text-[11px] text-muted-foreground">
-                            {c.last_message?.content ?? c.contact?.phone_number}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1">
-                          <span className="text-[10px] text-muted-foreground">
-                            {new Date(c.last_message_at).toLocaleTimeString("pt-BR", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                          {c.unread_count > 0 ? (
-                            <span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-                              {c.unread_count}
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </section>
-
-            <section
-              className={`surface-panel min-h-[620px] flex-col p-4 ${activeId ? "flex" : "hidden lg:flex"}`}
-            >
-              {!active ? (
-                <div className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
-                  Selecione uma conversa para ver o histórico.
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 border-b border-border pb-3">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="lg:hidden"
-                      onClick={() => setActiveId(null)}
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-1 font-display text-sm font-semibold">
-                        {active.contact?.name ?? active.contact?.profile_name ?? active.contact?.phone_number}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{active.contact?.phone_number}</p>
-                    </div>
-                    <Badge variant="outline">{CONV_STATUS_LABEL[active.status]}</Badge>
-                  </div>
-
-                  <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto py-4">
-                    {messages.length === 0 ? (
-                      <p className="text-center text-xs text-muted-foreground">Sem mensagens.</p>
-                    ) : (
-                      messages.map((m) => (
-                        <div
-                          key={m.id}
-                          className={`flex ${m.direction === "outbound" ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
-                              m.direction === "outbound"
-                                ? "bg-primary text-primary-foreground"
-                                : "border border-border bg-surface"
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                            <div className="mt-1 flex items-center justify-end gap-1.5 text-[10px] opacity-80">
-                              {m.from_ai ? <Bot className="h-3 w-3" /> : null}
-                              <span>
-                                {new Date(m.created_at).toLocaleTimeString("pt-BR", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
-                              <MessageStatusIcon message={m} />
-                            </div>
-                            {m.status === "failed" ? (
-                              <p className="mt-1 text-[10px] text-destructive-foreground/90">
-                                Não foi possível enviar esta mensagem.
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="sticky bottom-0 flex items-end gap-2 border-t border-border pt-3">
-                    <Textarea
-                      rows={2}
-                      value={draft}
-                      onChange={(e) => setDraft(e.target.value)}
-                      placeholder="Escreva uma resposta"
-                      className="min-h-[44px] resize-none"
-                    />
-                    <Button
-                      disabled={!draft.trim() || send.isPending}
-                      onClick={() => {
-                        const content = draft.trim();
-                        setDraft("");
-                        send.mutate(content);
-                      }}
-                    >
-                      {send.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </section>
-
-            <section
-              className={`surface-panel space-y-4 p-4 ${activeId ? "block" : "hidden lg:block"}`}
-            >
-              <h2 className="font-display text-sm font-semibold">Contato</h2>
-              {!active ? (
-                <p className="text-xs text-muted-foreground">Nenhuma conversa selecionada.</p>
-              ) : (
-                <>
-                  <dl className="space-y-2 text-sm">
-                    <div>
-                      <dt className="text-xs text-muted-foreground">Nome</dt>
-                      <dd>{active.contact?.name ?? active.contact?.profile_name ?? "—"}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-muted-foreground">Telefone</dt>
-                      <dd>{active.contact?.phone_number}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-muted-foreground">Origem</dt>
-                      <dd>WhatsApp</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-muted-foreground">Status do atendimento</dt>
-                      <dd>{CONV_STATUS_LABEL[active.status]}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-muted-foreground">IA nesta conversa</dt>
-                      <dd>{active.ai_enabled ? "Ativada" : "Desativada"}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      disabled={modeMutation.isPending || active.status === "human"}
-                      onClick={() => modeMutation.mutate("human")}
-                    >
-                      <UserCheck className="mr-2 h-4 w-4" /> Assumir atendimento
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      disabled={modeMutation.isPending || active.status === "ai"}
-                      onClick={() => modeMutation.mutate("ai")}
-                    >
-                      <Bot className="mr-2 h-4 w-4" /> Devolver para IA
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full"
-                      disabled={modeMutation.isPending || active.status === "closed"}
-                      onClick={() => modeMutation.mutate("closed")}
-                    >
-                      <X className="mr-2 h-4 w-4" /> Encerrar conversa
-                    </Button>
-                  </div>
-
-                  <p className="flex items-start gap-2 rounded-lg border border-border/70 bg-background/40 p-3 text-[11px] text-muted-foreground">
-                    <Phone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                    Respostas enviadas daqui saem pelo número oficial do escritório.
-                  </p>
-                </>
-              )}
-            </section>
-          </div>
+          <section className="surface-panel space-y-3 p-6">
+            <h2 className="font-display text-base font-semibold">
+              As conversas ficam na Central de Atendimento
+            </h2>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              A fila da equipe, a atribuição de responsável, a transferência, as notas internas e o
+              histórico de cada atendimento agora ficam em uma tela dedicada, com atualização em
+              tempo real para todos os membros do escritório.
+            </p>
+            <Button asChild>
+              <Link to="/atendimento">Abrir Central de Atendimento</Link>
+            </Button>
+          </section>
         </TabsContent>
+
       </Tabs>
     </div>
   );

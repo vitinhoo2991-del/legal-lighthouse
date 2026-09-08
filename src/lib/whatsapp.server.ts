@@ -391,19 +391,24 @@ export async function processWebhookPayload(officeId: string, payload: unknown) 
     const eventId = `${status.externalId}:${status.status}`;
     if (!(await recordEvent(officeId, eventId, `status.${status.status}`))) continue;
     try {
-      const patch: Record<string, unknown> = {};
-      if (status.status === "sent") patch["status"] = "sent";
+      const patch: {
+        status?: "sent" | "delivered" | "read" | "failed";
+        delivered_at?: string;
+        read_at?: string;
+        error_message?: string;
+      } = {};
+      if (status.status === "sent") patch.status = "sent";
       if (status.status === "delivered") {
-        patch["status"] = "delivered";
-        patch["delivered_at"] = status.timestamp;
+        patch.status = "delivered";
+        patch.delivered_at = status.timestamp;
       }
       if (status.status === "read") {
-        patch["status"] = "read";
-        patch["read_at"] = status.timestamp;
+        patch.status = "read";
+        patch.read_at = status.timestamp;
       }
       if (status.status === "failed") {
-        patch["status"] = "failed";
-        patch["error_message"] = status.errorMessage ?? "falha reportada pelo WhatsApp";
+        patch.status = "failed";
+        patch.error_message = status.errorMessage ?? "falha reportada pelo WhatsApp";
       }
       if (Object.keys(patch).length) {
         await db

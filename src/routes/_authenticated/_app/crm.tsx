@@ -1,6 +1,7 @@
 // Etapa 06 — CRM + Pipeline. Kanban, lista, detalhe, atividades e tarefas
 // sobre as oportunidades reais do escritório. Nenhum dado é gerado localmente.
 import { useEffect, useMemo, useState } from "react";
+import { UpcomingEvents } from "@/components/calendar/UpcomingEvents";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -1039,6 +1040,17 @@ function OpportunitySheet(props: {
                     : `Perdida em ${shortDate(opp.lost_at)} — mova para uma etapa aberta para reabrir.`}
                 </p>
               )}
+            </section>
+
+            <Separator />
+
+            <section className="rounded-xl border border-border bg-surface/60 p-4">
+              <UpcomingEvents
+                opportunityId={opp.id}
+                leadId={opp.lead_id ?? null}
+                title="Agendar consulta"
+                eventType="consulta"
+              />
             </section>
 
             <Separator />

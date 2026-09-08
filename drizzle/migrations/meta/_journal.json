@@ -15,6 +15,13 @@
       "when": 1788901987791,
       "tag": "0001_ai_attendance",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788903945957,
+      "tag": "0002_whatsapp_official",
+      "breakpoints": true
     }
   ]
 }

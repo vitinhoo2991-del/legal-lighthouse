@@ -52,11 +52,7 @@ import {
   type QueueView,
   type ServiceStatus,
 } from "@/lib/multiservice.functions";
-import {
-  getWhatsappMessages,
-  sendWhatsappMessage,
-  type WaMessage,
-} from "@/lib/whatsapp.functions";
+import { getWhatsappMessages, sendWhatsappMessage, type WaMessage } from "@/lib/whatsapp.functions";
 
 export const Route = createFileRoute("/_authenticated/_app/atendimento")({
   component: AtendimentoPage,
@@ -95,8 +91,7 @@ function MessageStatusIcon({ message }: { message: WaMessage }) {
     return <AlertTriangle className="h-3.5 w-3.5 text-destructive" aria-label="Falhou" />;
   if (message.status === "queued")
     return <Clock className="h-3.5 w-3.5 opacity-70" aria-label="Enviando" />;
-  if (message.status === "read")
-    return <CheckCheck className="h-3.5 w-3.5" aria-label="Lida" />;
+  if (message.status === "read") return <CheckCheck className="h-3.5 w-3.5" aria-label="Lida" />;
   if (message.status === "delivered")
     return <CheckCheck className="h-3.5 w-3.5 opacity-70" aria-label="Entregue" />;
   return <Check className="h-3.5 w-3.5 opacity-70" aria-label="Enviada" />;
@@ -152,7 +147,11 @@ function AtendimentoPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (profile) setSoundOn((profile as unknown as { notification_sound_enabled?: boolean }).notification_sound_enabled ?? true);
+    if (profile)
+      setSoundOn(
+        (profile as unknown as { notification_sound_enabled?: boolean })
+          .notification_sound_enabled ?? true,
+      );
   }, [profile]);
 
   const queueQuery = useQuery({
@@ -160,7 +159,11 @@ function AtendimentoPage() {
     queryFn: () => fetchQueue({ data: { view, search } }),
     refetchInterval: 60_000,
   });
-  const teamQuery = useQuery({ queryKey: ["service-team"], queryFn: () => fetchTeam(), refetchInterval: 60_000 });
+  const teamQuery = useQuery({
+    queryKey: ["service-team"],
+    queryFn: () => fetchTeam(),
+    refetchInterval: 60_000,
+  });
   const notificationsQuery = useQuery({
     queryKey: ["service-notifications"],
     queryFn: () => fetchNotifications(),
@@ -197,7 +200,12 @@ function AtendimentoPage() {
       .channel(`multiatendimento-${officeId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "whatsapp_conversations", filter: `office_id=eq.${officeId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "whatsapp_conversations",
+          filter: `office_id=eq.${officeId}`,
+        },
         () => {
           queryClient.invalidateQueries({ queryKey: ["service-queue"] });
           queryClient.invalidateQueries({ queryKey: ["conversation-detail"] });
@@ -206,7 +214,12 @@ function AtendimentoPage() {
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "whatsapp_messages", filter: `office_id=eq.${officeId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "whatsapp_messages",
+          filter: `office_id=eq.${officeId}`,
+        },
         (payload) => {
           const row = payload.new as { conversation_id: string; direction: string };
           queryClient.invalidateQueries({ queryKey: ["service-queue"] });
@@ -216,12 +229,22 @@ function AtendimentoPage() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "conversation_events", filter: `office_id=eq.${officeId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "conversation_events",
+          filter: `office_id=eq.${officeId}`,
+        },
         () => queryClient.invalidateQueries({ queryKey: ["conversation-detail"] }),
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `office_id=eq.${officeId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `office_id=eq.${officeId}`,
+        },
         () => queryClient.invalidateQueries({ queryKey: ["service-notifications"] }),
       )
       .subscribe();
@@ -338,7 +361,10 @@ function AtendimentoPage() {
     const next = !soundOn;
     setSoundOn(next);
     if (profile?.id) {
-      await supabase.from("profiles").update({ notification_sound_enabled: next }).eq("id", profile.id);
+      await supabase
+        .from("profiles")
+        .update({ notification_sound_enabled: next })
+        .eq("id", profile.id);
     }
   };
 
@@ -402,7 +428,9 @@ function AtendimentoPage() {
 
       <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)_300px]">
         {/* -------- fila -------- */}
-        <section className={`surface-panel flex max-h-[640px] flex-col p-4 ${activeId ? "hidden xl:flex" : "flex"}`}>
+        <section
+          className={`surface-panel flex max-h-[640px] flex-col p-4 ${activeId ? "hidden xl:flex" : "flex"}`}
+        >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -447,7 +475,9 @@ function AtendimentoPage() {
                   type="button"
                   onClick={() => setActiveId(c.id)}
                   className={`w-full rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                    c.id === activeId ? "border-primary/40 bg-primary-soft/60" : "border-border hover:border-primary/30"
+                    c.id === activeId
+                      ? "border-primary/40 bg-primary-soft/60"
+                      : "border-border hover:border-primary/30"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -460,7 +490,9 @@ function AtendimentoPage() {
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
                         <span className="inline-flex items-center gap-1">
-                          <span className={`h-1.5 w-1.5 rounded-full ${SERVICE_LABEL[c.service_status].dot}`} />
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${SERVICE_LABEL[c.service_status].dot}`}
+                          />
                           {SERVICE_LABEL[c.service_status].label}
                         </span>
                         <span className="inline-flex items-center gap-1">
@@ -479,7 +511,9 @@ function AtendimentoPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1">
-                      <span className="text-[10px] text-muted-foreground">{timeOf(c.last_message_at)}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {timeOf(c.last_message_at)}
+                      </span>
                       {c.unread_count > 0 ? (
                         <span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                           {c.unread_count}
@@ -494,7 +528,9 @@ function AtendimentoPage() {
         </section>
 
         {/* -------- conversa -------- */}
-        <section className={`surface-panel min-h-[640px] flex-col p-4 ${activeId ? "flex" : "hidden xl:flex"}`}>
+        <section
+          className={`surface-panel min-h-[640px] flex-col p-4 ${activeId ? "flex" : "hidden xl:flex"}`}
+        >
           {!active ? (
             <div className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
               Selecione uma conversa da fila.
@@ -502,15 +538,26 @@ function AtendimentoPage() {
           ) : (
             <>
               <div className="flex items-center gap-3 border-b border-border pb-3">
-                <Button size="icon" variant="ghost" className="xl:hidden" onClick={() => setActiveId(null)}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="xl:hidden"
+                  onClick={() => setActiveId(null)}
+                >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-1 font-display text-sm font-semibold">
-                    {active.contact?.name ?? active.contact?.profile_name ?? active.contact?.phone_number}
+                    {active.contact?.name ??
+                      active.contact?.profile_name ??
+                      active.contact?.phone_number}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {active.assigned_to ? `👤 Atendimento humano — ${assignedLabel}` : active.ai_enabled && active.status === "ai" ? "🤖 Atendimento pela IA" : "Sem responsável"}
+                    {active.assigned_to
+                      ? `👤 Atendimento humano — ${assignedLabel}`
+                      : active.ai_enabled && active.status === "ai"
+                        ? "🤖 Atendimento pela IA"
+                        : "Sem responsável"}
                   </p>
                 </div>
                 <Badge variant="outline">{SERVICE_LABEL[active.service_status].label}</Badge>
@@ -521,7 +568,10 @@ function AtendimentoPage() {
                   <p className="text-center text-xs text-muted-foreground">Sem mensagens.</p>
                 ) : (
                   messages.map((m) => (
-                    <div key={m.id} className={`flex ${m.direction === "outbound" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={m.id}
+                      className={`flex ${m.direction === "outbound" ? "justify-end" : "justify-start"}`}
+                    >
                       <div
                         className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
                           m.direction === "outbound"
@@ -589,7 +639,9 @@ function AtendimentoPage() {
         </section>
 
         {/* -------- detalhes -------- */}
-        <section className={`surface-panel space-y-4 p-4 ${activeId ? "block" : "hidden xl:block"}`}>
+        <section
+          className={`surface-panel space-y-4 p-4 ${activeId ? "block" : "hidden xl:block"}`}
+        >
           {!active || !detail ? (
             <p className="text-xs text-muted-foreground">Nenhuma conversa selecionada.</p>
           ) : (
@@ -599,7 +651,9 @@ function AtendimentoPage() {
                 <dl className="mt-2 space-y-1 text-sm">
                   <div className="flex justify-between gap-2">
                     <dt className="text-xs text-muted-foreground">Nome</dt>
-                    <dd className="truncate">{detail.contact?.name ?? detail.contact?.profile_name ?? "—"}</dd>
+                    <dd className="truncate">
+                      {detail.contact?.name ?? detail.contact?.profile_name ?? "—"}
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-2">
                     <dt className="text-xs text-muted-foreground">Telefone</dt>
@@ -652,11 +706,7 @@ function AtendimentoPage() {
                 >
                   <UserCheck className="mr-2 h-4 w-4" /> Assumir atendimento
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setTransferOpen(true)}
-                >
+                <Button variant="outline" className="w-full" onClick={() => setTransferOpen(true)}>
                   <Share2 className="mr-2 h-4 w-4" /> Transferir
                 </Button>
                 <Button
@@ -690,7 +740,10 @@ function AtendimentoPage() {
                   <h2 className="font-display text-sm font-semibold">Notas internas</h2>
                   <ul className="mt-2 space-y-2">
                     {detail.notes.map((n) => (
-                      <li key={n.id} className="rounded-lg border border-border/70 bg-background/40 p-2 text-xs">
+                      <li
+                        key={n.id}
+                        className="rounded-lg border border-border/70 bg-background/40 p-2 text-xs"
+                      >
                         <p className="whitespace-pre-wrap">🔒 {n.content}</p>
                         <p className="mt-1 text-[10px] text-muted-foreground">
                           {n.author_name ?? "Equipe"} · {timeOf(n.created_at)}

@@ -6,19 +6,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 export type ServiceStatus =
-  | "aberta"
-  | "em_atendimento"
-  | "aguardando_cliente"
-  | "aguardando_equipe"
-  | "encerrada";
+  "aberta" | "em_atendimento" | "aguardando_cliente" | "aguardando_equipe" | "encerrada";
 
 export type QueueView =
-  | "all"
-  | "mine"
-  | "unassigned"
-  | "waiting_service"
-  | "waiting_client"
-  | "closed";
+  "all" | "mine" | "unassigned" | "waiting_service" | "waiting_client" | "closed";
 
 export interface QueueCounts {
   all: number;
@@ -246,9 +237,12 @@ export const listServiceQueue = createServerFn({ method: "POST" })
         .order("last_message_at", { ascending: false })
         .limit(100);
 
-      if (data.view === "mine") query = query.eq("assigned_to", profileId).neq("service_status", "encerrada");
-      if (data.view === "unassigned") query = query.is("assigned_to", null).neq("service_status", "encerrada");
-      if (data.view === "waiting_service") query = query.in("service_status", ["aberta", "aguardando_equipe"]);
+      if (data.view === "mine")
+        query = query.eq("assigned_to", profileId).neq("service_status", "encerrada");
+      if (data.view === "unassigned")
+        query = query.is("assigned_to", null).neq("service_status", "encerrada");
+      if (data.view === "waiting_service")
+        query = query.in("service_status", ["aberta", "aguardando_equipe"]);
       if (data.view === "waiting_client") query = query.eq("service_status", "aguardando_cliente");
       if (data.view === "closed") query = query.eq("service_status", "encerrada");
       if (data.view === "all") query = query.neq("service_status", "encerrada");
@@ -275,7 +269,9 @@ export const listServiceQueue = createServerFn({ method: "POST" })
           .eq("office_id", officeId)
           .ilike("content", `%${term}%`)
           .limit(200);
-        const ids = new Set((hits ?? []).map((h: { conversation_id: string }) => h.conversation_id));
+        const ids = new Set(
+          (hits ?? []).map((h: { conversation_id: string }) => h.conversation_id),
+        );
         list = list.filter(
           (c) =>
             ids.has(c.id) ||
@@ -294,7 +290,10 @@ export const listServiceQueue = createServerFn({ method: "POST" })
           .in("conversation_id", ids)
           .order("created_at", { ascending: false })
           .limit(400);
-        const lastByConv = new Map<string, { content: string; direction: "inbound" | "outbound" }>();
+        const lastByConv = new Map<
+          string,
+          { content: string; direction: "inbound" | "outbound" }
+        >();
         for (const m of recent ?? []) {
           if (!lastByConv.has(m.conversation_id)) {
             lastByConv.set(m.conversation_id, { content: m.content, direction: m.direction });
@@ -320,11 +319,17 @@ export const getConversationDetail = createServerFn({ method: "GET" })
     const [{ data: assignee }, { data: lead }, { data: events }, { data: notes }] =
       await Promise.all([
         conversation.assigned_to
-          ? ctx.supabase.from("profiles").select("name").eq("id", conversation.assigned_to).maybeSingle()
+          ? ctx.supabase
+              .from("profiles")
+              .select("name")
+              .eq("id", conversation.assigned_to)
+              .maybeSingle()
           : Promise.resolve({ data: null }),
         ctx.supabase
           .from("leads")
-          .select("id, lead_score, lead_temperature, practice_area, qualification_status, score_reason")
+          .select(
+            "id, lead_score, lead_temperature, practice_area, qualification_status, score_reason",
+          )
           .eq("office_id", officeId)
           .eq("whatsapp_conversation_id", data.conversationId)
           .maybeSingle(),
@@ -526,9 +531,10 @@ export const transferConversation = createServerFn({ method: "POST" })
       .eq("id", data.conversationId)
       .eq("office_id", officeId);
 
-    const { data: updated } = await (conversation.assigned_to
-      ? guard.eq("assigned_to", conversation.assigned_to)
-      : guard.is("assigned_to", null)
+    const { data: updated } = await (
+      conversation.assigned_to
+        ? guard.eq("assigned_to", conversation.assigned_to)
+        : guard.is("assigned_to", null)
     ).select("id");
 
     if (!updated || updated.length === 0) {
@@ -665,10 +671,10 @@ export const setConversationServiceStatus = createServerFn({ method: "POST" })
     const closing = data.serviceStatus === "encerrada";
     const patch: Record<string, unknown> = { service_status: data.serviceStatus };
     if (closing) {
-      patch['status'] = "closed";
-      patch['ai_enabled'] = false;
-      patch['closed_at'] = new Date().toISOString();
-      patch['closed_by'] = profileId;
+      patch["status"] = "closed";
+      patch["ai_enabled"] = false;
+      patch["closed_at"] = new Date().toISOString();
+      patch["closed_by"] = profileId;
     }
 
     const { error } = await ctx.supabase

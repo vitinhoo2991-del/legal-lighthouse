@@ -98,8 +98,12 @@ function isOutsideHours(settings: any, timezone: string) {
     const day = map[parts.find((p) => p.type === "weekday")?.value ?? "Mon"] ?? 1;
     if (!(settings.hours_days ?? []).includes(day)) return true;
     const now = hour * 60 + minute;
-    const [sh, sm] = String(settings.hours_start ?? "09:00").split(":").map(Number);
-    const [eh, em] = String(settings.hours_end ?? "18:00").split(":").map(Number);
+    const [sh, sm] = String(settings.hours_start ?? "09:00")
+      .split(":")
+      .map(Number);
+    const [eh, em] = String(settings.hours_end ?? "18:00")
+      .split(":")
+      .map(Number);
     return now < (sh ?? 0) * 60 + (sm ?? 0) || now > (eh ?? 23) * 60 + (em ?? 59);
   } catch {
     return false;
@@ -168,11 +172,7 @@ export async function sendOutboundText(options: {
   }
 }
 
-async function replyWithAi(options: {
-  officeId: string;
-  conversationId: string;
-  toPhone: string;
-}) {
+async function replyWithAi(options: { officeId: string; conversationId: string; toPhone: string }) {
   const db = await admin();
   const { data: settings } = await db
     .from("ai_agent_settings")
@@ -325,7 +325,8 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
       const conversationPatch: {
         last_message_at: string;
         unread_count: number;
-        service_status: "aberta" | "aguardando_equipe" | "aguardando_cliente" | "em_atendimento" | "encerrada";
+        service_status:
+          "aberta" | "aguardando_equipe" | "aguardando_cliente" | "em_atendimento" | "encerrada";
         status?: "ai" | "human";
         ai_enabled?: boolean;
         closed_at?: string | null;
@@ -335,15 +336,12 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         service_status: nextServiceStatus,
       };
       if (wasClosed) {
-        conversationPatch['status'] = conversation.assigned_to ? "human" : "ai";
-        conversationPatch['ai_enabled'] = !conversation.assigned_to;
-        conversationPatch['closed_at'] = null;
+        conversationPatch["status"] = conversation.assigned_to ? "human" : "ai";
+        conversationPatch["ai_enabled"] = !conversation.assigned_to;
+        conversationPatch["closed_at"] = null;
       }
 
-      await db
-        .from("whatsapp_conversations")
-        .update(conversationPatch)
-        .eq("id", conversation.id);
+      await db.from("whatsapp_conversations").update(conversationPatch).eq("id", conversation.id);
 
       if (wasClosed) {
         await recordConversationEvent(
@@ -384,9 +382,8 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
       // Etapa 04 — qualificação inteligente sobre a conversa real.
       if (message.type === "text" && content.trim()) {
         try {
-          const { ensureWhatsappLead, qualifyLead } = await import(
-            "@/lib/leads/qualification.server"
-          );
+          const { ensureWhatsappLead, qualifyLead } =
+            await import("@/lib/leads/qualification.server");
           const leadId = await ensureWhatsappLead({
             officeId,
             contactId: conversation.contactId,
@@ -415,10 +412,7 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
             });
           }
         } catch (error) {
-          console.error(
-            "[lead-qualification]",
-            error instanceof Error ? error.message : "erro",
-          );
+          console.error("[lead-qualification]", error instanceof Error ? error.message : "erro");
         }
       }
 

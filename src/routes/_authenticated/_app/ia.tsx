@@ -8,8 +8,14 @@ export const Route = createFileRoute("/_authenticated/_app/ia")({
   component: IaPage,
 });
 
-const MODULES = [
-  { icon: Sparkles, title: "Atendimento IA", text: "Primeira resposta e triagem automática dos contatos.", status: "Em desenvolvimento" },
+const MODULES: Array<{
+  icon: typeof Bot;
+  title: string;
+  text: string;
+  status: string;
+  to?: "/atendimento-ia";
+}> = [
+  { icon: Sparkles, title: "Atendimento IA", text: "Primeira resposta e triagem automática dos contatos.", status: "Disponível", to: "/atendimento-ia" },
   { icon: Bot, title: "Agentes IA", text: "Agentes configuráveis por área jurídica e canal.", status: "Em desenvolvimento" },
   { icon: BookOpen, title: "Base de conhecimento", text: "Conteúdo do escritório usado como fonte das respostas.", status: "Em desenvolvimento" },
   { icon: Mic, title: "Voz", text: "Atendimento por voz e transcrição de ligações.", status: "Disponível em breve" },
@@ -38,16 +44,31 @@ function IaPage() {
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                   <m.icon className="h-5 w-5" />
                 </span>
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background/50 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                  <Lock className="h-3 w-3" />
+                <span
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                    m.to
+                      ? "border-primary/30 bg-primary-soft text-primary"
+                      : "border-border bg-background/50 text-muted-foreground"
+                  }`}
+                >
+                  {m.to ? null : <Lock className="h-3 w-3" />}
                   {m.status}
                 </span>
               </div>
               <h2 className="mt-5 font-display text-base font-semibold">{m.title}</h2>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{m.text}</p>
-              <p className="mt-5 border-t border-border/70 pt-3 text-[11px] text-muted-foreground/80">
-                Recurso poderá fazer parte de planos específicos.
-              </p>
+              {m.to ? (
+                <Link
+                  to={m.to}
+                  className="mt-5 border-t border-border/70 pt-3 text-[11px] text-primary hover:underline"
+                >
+                  Abrir central de atendimento IA
+                </Link>
+              ) : (
+                <p className="mt-5 border-t border-border/70 pt-3 text-[11px] text-muted-foreground/80">
+                  Recurso poderá fazer parte de planos específicos.
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}

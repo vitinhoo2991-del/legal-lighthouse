@@ -81,11 +81,25 @@ export const WhatsAppService = {
     return channel.provider.getChannelInfo();
   },
 
-  /** Handshake de verificação do webhook. */
+  /**
+   * Handshake de verificação do webhook.
+   * Depende apenas do verify token do escritório: a Meta valida a URL ANTES
+   * de o número/credenciais existirem.
+   */
   async verifyWebhookChallenge(officeId: string, query: URLSearchParams): Promise<string | null> {
-    const channel = await getOfficeChannel(officeId);
-    if (!channel) return null;
-    return channel.provider.verifyWebhookChallenge(query);
+    if (query.get("hub.mode") !== "subscribe") return null;
+    const token = query.get("hub.verify_token");
+    if (!token) return null;
+
+    const db = await admin();
+    const { data } = await db
+      .from("whatsapp_credentials")
+      .select("verify_token")
+      .eq("office_id", officeId)
+      .maybeSingle();
+
+    if (!data?.verify_token || data.verify_token !== token) return null;
+    return query.get("hub.challenge") ?? "";
   },
 
   /**

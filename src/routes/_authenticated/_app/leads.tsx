@@ -453,6 +453,30 @@ function LeadDetailSheet({
     },
   });
 
+  // Etapa 06 — converte o lead real em oportunidade comercial no CRM.
+  const newOpportunity = useServerFn(createOpportunity);
+  const opportunityMutation = useMutation({
+    mutationFn: () =>
+      newOpportunity({
+        data: {
+          leadId: leadId!,
+          title: lead?.practice_area
+            ? `${lead.practice_area} — ${lead?.name ?? "novo contato"}`
+            : `Oportunidade — ${lead?.name ?? "novo contato"}`,
+          description: lead?.case_summary ?? null,
+          assignedTo: lead?.assigned_to ?? null,
+          probability: 0,
+          source: lead?.source ?? "manual",
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Oportunidade criada no CRM.");
+      navigate({ to: "/crm" });
+    },
+    onError: () => toast.error("Não foi possível criar a oportunidade."),
+  });
+
+
   return (
     <Sheet open={Boolean(leadId)} onOpenChange={(open) => (!open ? onClose() : null)}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">

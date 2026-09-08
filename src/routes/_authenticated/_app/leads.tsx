@@ -41,6 +41,7 @@ import {
   type LeadStatus,
   type LeadTemperature,
 } from "@/lib/leads.functions";
+import { createOpportunity } from "@/lib/crm.functions";
 
 export const Route = createFileRoute("/_authenticated/_app/leads")({
   component: LeadsPage,

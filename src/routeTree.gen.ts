@@ -17,11 +17,17 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/_app'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/_app/agenda'
 import { Route as AuthenticatedAppAtendimentoRouteImport } from './routes/_authenticated/_app/atendimento'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/_app/clientes'
 import { Route as AuthenticatedAppCrmRouteImport } from './routes/_authenticated/_app/crm'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
+import { Route as AuthenticatedAppDocumentosRouteImport } from './routes/_authenticated/_app/documentos'
+import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/_app/financeiro'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/_app/leads'
+import { Route as AuthenticatedAppProcessosRouteImport } from './routes/_authenticated/_app/processos'
+import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/_app/relatorios'
+import { Route as AuthenticatedAppWhatsappRouteImport } from './routes/_authenticated/_app/whatsapp'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -61,6 +67,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppAtendimentoRoute =
   AuthenticatedAppAtendimentoRouteImport.update({
     id: '/atendimento',
@@ -84,11 +95,41 @@ const AuthenticatedAppDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDocumentosRoute =
+  AuthenticatedAppDocumentosRouteImport.update({
+    id: '/documentos',
+    path: '/documentos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFinanceiroRoute =
+  AuthenticatedAppFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppProcessosRoute =
+  AuthenticatedAppProcessosRouteImport.update({
+    id: '/processos',
+    path: '/processos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppRelatoriosRoute =
+  AuthenticatedAppRelatoriosRouteImport.update({
+    id: '/relatorios',
+    path: '/relatorios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppWhatsappRoute =
+  AuthenticatedAppWhatsappRouteImport.update({
+    id: '/whatsapp',
+    path: '/whatsapp',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,11 +138,17 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/agenda': typeof AuthenticatedAppAgendaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
   '/crm': typeof AuthenticatedAppCrmRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/documentos': typeof AuthenticatedAppDocumentosRoute
+  '/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/leads': typeof AuthenticatedAppLeadsRoute
+  '/processos': typeof AuthenticatedAppProcessosRoute
+  '/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/whatsapp': typeof AuthenticatedAppWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,11 +157,17 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/agenda': typeof AuthenticatedAppAgendaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
   '/crm': typeof AuthenticatedAppCrmRoute
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/documentos': typeof AuthenticatedAppDocumentosRoute
+  '/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/leads': typeof AuthenticatedAppLeadsRoute
+  '/processos': typeof AuthenticatedAppProcessosRoute
+  '/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/whatsapp': typeof AuthenticatedAppWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -126,11 +179,17 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/_app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/_app/atendimento': typeof AuthenticatedAppAtendimentoRoute
   '/_authenticated/_app/clientes': typeof AuthenticatedAppClientesRoute
   '/_authenticated/_app/crm': typeof AuthenticatedAppCrmRoute
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/documentos': typeof AuthenticatedAppDocumentosRoute
+  '/_authenticated/_app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/_authenticated/_app/leads': typeof AuthenticatedAppLeadsRoute
+  '/_authenticated/_app/processos': typeof AuthenticatedAppProcessosRoute
+  '/_authenticated/_app/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/_authenticated/_app/whatsapp': typeof AuthenticatedAppWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,11 +200,17 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/onboarding'
+    | '/agenda'
     | '/atendimento'
     | '/clientes'
     | '/crm'
     | '/dashboard'
+    | '/documentos'
+    | '/financeiro'
     | '/leads'
+    | '/processos'
+    | '/relatorios'
+    | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,11 +219,17 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/onboarding'
+    | '/agenda'
     | '/atendimento'
     | '/clientes'
     | '/crm'
     | '/dashboard'
+    | '/documentos'
+    | '/financeiro'
     | '/leads'
+    | '/processos'
+    | '/relatorios'
+    | '/whatsapp'
   id:
     | '__root__'
     | '/'
@@ -169,11 +240,17 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/_app'
     | '/_authenticated/onboarding'
+    | '/_authenticated/_app/agenda'
     | '/_authenticated/_app/atendimento'
     | '/_authenticated/_app/clientes'
     | '/_authenticated/_app/crm'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/documentos'
+    | '/_authenticated/_app/financeiro'
     | '/_authenticated/_app/leads'
+    | '/_authenticated/_app/processos'
+    | '/_authenticated/_app/relatorios'
+    | '/_authenticated/_app/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/_app/agenda': {
+      id: '/_authenticated/_app/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/atendimento': {
       id: '/_authenticated/_app/atendimento'
       path: '/atendimento'
@@ -271,6 +355,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/_app/documentos': {
+      id: '/_authenticated/_app/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof AuthenticatedAppDocumentosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/financeiro': {
+      id: '/_authenticated/_app/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof AuthenticatedAppFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/leads': {
       id: '/_authenticated/_app/leads'
       path: '/leads'
@@ -278,23 +376,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLeadsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/_app/processos': {
+      id: '/_authenticated/_app/processos'
+      path: '/processos'
+      fullPath: '/processos'
+      preLoaderRoute: typeof AuthenticatedAppProcessosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/relatorios': {
+      id: '/_authenticated/_app/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/whatsapp': {
+      id: '/_authenticated/_app/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AuthenticatedAppWhatsappRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
   AuthenticatedAppAtendimentoRoute: typeof AuthenticatedAppAtendimentoRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
   AuthenticatedAppCrmRoute: typeof AuthenticatedAppCrmRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
+  AuthenticatedAppDocumentosRoute: typeof AuthenticatedAppDocumentosRoute
+  AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
+  AuthenticatedAppProcessosRoute: typeof AuthenticatedAppProcessosRoute
+  AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
+  AuthenticatedAppWhatsappRoute: typeof AuthenticatedAppWhatsappRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
   AuthenticatedAppAtendimentoRoute: AuthenticatedAppAtendimentoRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
   AuthenticatedAppCrmRoute: AuthenticatedAppCrmRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
+  AuthenticatedAppDocumentosRoute: AuthenticatedAppDocumentosRoute,
+  AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
+  AuthenticatedAppProcessosRoute: AuthenticatedAppProcessosRoute,
+  AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
+  AuthenticatedAppWhatsappRoute: AuthenticatedAppWhatsappRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

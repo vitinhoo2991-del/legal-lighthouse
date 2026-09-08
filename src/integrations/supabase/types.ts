@@ -459,6 +459,463 @@ export type Database = {
           },
         ]
       }
+      crm_activities: {
+        Row: {
+          activity_at: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          office_id: string
+          opportunity_id: string
+          owner_profile_id: string | null
+          status: Database["public"]["Enums"]["crm_activity_status"]
+          type: Database["public"]["Enums"]["crm_activity_type"]
+          updated_at: string
+        }
+        Insert: {
+          activity_at?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          office_id: string
+          opportunity_id: string
+          owner_profile_id?: string | null
+          status?: Database["public"]["Enums"]["crm_activity_status"]
+          type: Database["public"]["Enums"]["crm_activity_type"]
+          updated_at?: string
+        }
+        Update: {
+          activity_at?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          office_id?: string
+          opportunity_id?: string
+          owner_profile_id?: string | null
+          status?: Database["public"]["Enums"]["crm_activity_status"]
+          type?: Database["public"]["Enums"]["crm_activity_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_owner_profile_id_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_opportunities: {
+        Row: {
+          assigned_to: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          estimated_value: number | null
+          expected_close_date: string | null
+          id: string
+          last_activity_at: string
+          lead_id: string | null
+          loss_reason: string | null
+          lost_at: string | null
+          lost_by: string | null
+          office_id: string
+          pipeline_id: string
+          probability: number
+          source: string | null
+          stage_changed_at: string
+          stage_id: string
+          title: string
+          updated_at: string
+          won_at: string | null
+          won_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          estimated_value?: number | null
+          expected_close_date?: string | null
+          id?: string
+          last_activity_at?: string
+          lead_id?: string | null
+          loss_reason?: string | null
+          lost_at?: string | null
+          lost_by?: string | null
+          office_id: string
+          pipeline_id: string
+          probability?: number
+          source?: string | null
+          stage_changed_at?: string
+          stage_id: string
+          title: string
+          updated_at?: string
+          won_at?: string | null
+          won_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          estimated_value?: number | null
+          expected_close_date?: string | null
+          id?: string
+          last_activity_at?: string
+          lead_id?: string | null
+          loss_reason?: string | null
+          lost_at?: string | null
+          lost_by?: string | null
+          office_id?: string
+          pipeline_id?: string
+          probability?: number
+          source?: string | null
+          stage_changed_at?: string
+          stage_id?: string
+          title?: string
+          updated_at?: string
+          won_at?: string | null
+          won_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_opportunities_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_lost_by_fkey"
+            columns: ["lost_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_won_by_fkey"
+            columns: ["won_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipelines: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          office_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          office_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          office_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipelines_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_stage_history: {
+        Row: {
+          actor_profile_id: string | null
+          created_at: string
+          description: string
+          from_stage_id: string | null
+          id: string
+          metadata: Json
+          office_id: string
+          opportunity_id: string
+          to_stage_id: string | null
+        }
+        Insert: {
+          actor_profile_id?: string | null
+          created_at?: string
+          description: string
+          from_stage_id?: string | null
+          id?: string
+          metadata?: Json
+          office_id: string
+          opportunity_id: string
+          to_stage_id?: string | null
+        }
+        Update: {
+          actor_profile_id?: string | null
+          created_at?: string
+          description?: string
+          from_stage_id?: string | null
+          id?: string
+          metadata?: Json
+          office_id?: string
+          opportunity_id?: string
+          to_stage_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_stage_history_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stage_history_from_stage_id_fkey"
+            columns: ["from_stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stage_history_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stage_history_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stage_history_to_stage_id_fkey"
+            columns: ["to_stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_stages: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["crm_stage_kind"]
+          name: string
+          office_id: string
+          pipeline_id: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["crm_stage_kind"]
+          name: string
+          office_id: string
+          pipeline_id: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["crm_stage_kind"]
+          name?: string
+          office_id?: string
+          pipeline_id?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_stages_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          id: string
+          office_id: string
+          opportunity_id: string
+          priority: Database["public"]["Enums"]["crm_task_priority"]
+          status: Database["public"]["Enums"]["crm_activity_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          office_id: string
+          opportunity_id: string
+          priority?: Database["public"]["Enums"]["crm_task_priority"]
+          status?: Database["public"]["Enums"]["crm_activity_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          office_id?: string
+          opportunity_id?: string
+          priority?: Database["public"]["Enums"]["crm_task_priority"]
+          status?: Database["public"]["Enums"]["crm_activity_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_score_history: {
         Row: {
           created_at: string
@@ -656,8 +1113,10 @@ export type Database = {
           id: string
           lead_id: string | null
           office_id: string
+          opportunity_id: string | null
           profile_id: string | null
           read_at: string | null
+          task_id: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
         }
@@ -668,8 +1127,10 @@ export type Database = {
           id?: string
           lead_id?: string | null
           office_id: string
+          opportunity_id?: string | null
           profile_id?: string | null
           read_at?: string | null
+          task_id?: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
         }
@@ -680,8 +1141,10 @@ export type Database = {
           id?: string
           lead_id?: string | null
           office_id?: string
+          opportunity_id?: string | null
           profile_id?: string | null
           read_at?: string | null
+          task_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["notification_type"]
         }
@@ -708,10 +1171,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notifications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notifications_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "crm_tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -1203,6 +1680,21 @@ export type Database = {
         | "aguardando_cliente"
         | "aguardando_equipe"
         | "encerrada"
+      crm_activity_status:
+        | "pendente"
+        | "em_andamento"
+        | "concluida"
+        | "cancelada"
+      crm_activity_type:
+        | "ligacao"
+        | "mensagem"
+        | "reuniao"
+        | "consulta"
+        | "proposta"
+        | "observacao"
+        | "tarefa"
+      crm_stage_kind: "aberta" | "ganha" | "perdida"
+      crm_task_priority: "baixa" | "media" | "alta" | "urgente"
       lead_intent: "desconhecida" | "informacao" | "avaliando" | "contratar"
       lead_qualification_status:
         | "novo"
@@ -1220,6 +1712,14 @@ export type Database = {
         | "conversation_assigned"
         | "conversation_transferred"
         | "hot_lead"
+        | "opportunity_assigned"
+        | "opportunity_transferred"
+        | "opportunity_stage_changed"
+        | "opportunity_won"
+        | "opportunity_lost"
+        | "task_assigned"
+        | "task_due_soon"
+        | "task_overdue"
       office_status: "active" | "suspended" | "cancelled"
       profile_status: "active" | "invited" | "inactive"
       whatsapp_connection_status:
@@ -1384,6 +1884,23 @@ export const Constants = {
         "aguardando_equipe",
         "encerrada",
       ],
+      crm_activity_status: [
+        "pendente",
+        "em_andamento",
+        "concluida",
+        "cancelada",
+      ],
+      crm_activity_type: [
+        "ligacao",
+        "mensagem",
+        "reuniao",
+        "consulta",
+        "proposta",
+        "observacao",
+        "tarefa",
+      ],
+      crm_stage_kind: ["aberta", "ganha", "perdida"],
+      crm_task_priority: ["baixa", "media", "alta", "urgente"],
       lead_intent: ["desconhecida", "informacao", "avaliando", "contratar"],
       lead_qualification_status: [
         "novo",
@@ -1402,6 +1919,14 @@ export const Constants = {
         "conversation_assigned",
         "conversation_transferred",
         "hot_lead",
+        "opportunity_assigned",
+        "opportunity_transferred",
+        "opportunity_stage_changed",
+        "opportunity_won",
+        "opportunity_lost",
+        "task_assigned",
+        "task_due_soon",
+        "task_overdue",
       ],
       office_status: ["active", "suspended", "cancelled"],
       profile_status: ["active", "invited", "inactive"],

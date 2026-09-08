@@ -41,6 +41,7 @@ import {
   type LeadStatus,
   type LeadTemperature,
 } from "@/lib/leads.functions";
+import { createOpportunity } from "@/lib/crm.functions";
 
 export const Route = createFileRoute("/_authenticated/_app/leads")({
   component: LeadsPage,
@@ -453,6 +454,30 @@ function LeadDetailSheet({
     },
   });
 
+  // Etapa 06 — converte o lead real em oportunidade comercial no CRM.
+  const newOpportunity = useServerFn(createOpportunity);
+  const opportunityMutation = useMutation({
+    mutationFn: () =>
+      newOpportunity({
+        data: {
+          leadId: leadId!,
+          title: lead?.practice_area
+            ? `${lead.practice_area} — ${lead?.name ?? "novo contato"}`
+            : `Oportunidade — ${lead?.name ?? "novo contato"}`,
+          description: lead?.case_summary ?? null,
+          assignedTo: lead?.assigned_to ?? null,
+          probability: 0,
+          source: lead?.source ?? "manual",
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Oportunidade criada no CRM.");
+      navigate({ to: "/crm" });
+    },
+    onError: () => toast.error("Não foi possível criar a oportunidade."),
+  });
+
+
   return (
     <Sheet open={Boolean(leadId)} onOpenChange={(open) => (!open ? onClose() : null)}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
@@ -681,16 +706,31 @@ function LeadDetailSheet({
               </div>
             </section>
 
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={() =>
-                navigate({ to: lead.whatsapp_conversation_id ? "/whatsapp" : "/atendimento-ia" })
-              }
-            >
-              <MessageSquare className="h-4 w-4" />
-              Abrir conversa original
-            </Button>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() =>
+                  navigate({
+                    to: lead.whatsapp_conversation_id ? "/atendimento" : "/atendimento-ia",
+                  })
+                }
+              >
+                <MessageSquare className="h-4 w-4" />
+                Abrir conversa original
+              </Button>
+              <Button
+                className="w-full gap-2"
+                disabled={opportunityMutation.isPending}
+                onClick={() => opportunityMutation.mutate()}
+              >
+                {opportunityMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Criar oportunidade
+              </Button>
+            </div>
+
 
             {history.length ? (
               <section className="space-y-2">

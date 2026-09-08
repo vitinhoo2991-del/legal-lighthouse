@@ -14,16 +14,191 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          action: string
+          actor_profile_id: string | null
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: string
+          metadata: Json
+          office_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_profile_id?: string | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json
+          office_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_profile_id?: string | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json
+          office_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offices: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string
+          document: string | null
+          email: string | null
+          goals: string[]
+          id: string
+          legal_name: string | null
+          logo_url: string | null
+          name: string
+          onboarding_completed: boolean
+          phone: string | null
+          practice_areas: string[]
+          state: string | null
+          status: Database["public"]["Enums"]["office_status"]
+          timezone: string
+          updated_at: string
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string
+          document?: string | null
+          email?: string | null
+          goals?: string[]
+          id?: string
+          legal_name?: string | null
+          logo_url?: string | null
+          name: string
+          onboarding_completed?: boolean
+          phone?: string | null
+          practice_areas?: string[]
+          state?: string | null
+          status?: Database["public"]["Enums"]["office_status"]
+          timezone?: string
+          updated_at?: string
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string
+          document?: string | null
+          email?: string | null
+          goals?: string[]
+          id?: string
+          legal_name?: string | null
+          logo_url?: string | null
+          name?: string
+          onboarding_completed?: boolean
+          phone?: string | null
+          practice_areas?: string[]
+          state?: string | null
+          status?: Database["public"]["Enums"]["office_status"]
+          timezone?: string
+          updated_at?: string
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          auth_user_id: string
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          last_seen_at: string | null
+          name: string
+          office_id: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["profile_status"]
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          last_seen_at?: string | null
+          name: string
+          office_id?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["profile_status"]
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          office_id?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["profile_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_office_id: { Args: never; Returns: string }
+      has_office_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "owner" | "admin" | "lawyer" | "assistant"
+      office_status: "active" | "suspended" | "cancelled"
+      profile_status: "active" | "invited" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +325,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["owner", "admin", "lawyer", "assistant"],
+      office_status: ["active", "suspended", "cancelled"],
+      profile_status: ["active", "invited", "inactive"],
+    },
   },
 } as const

@@ -36,6 +36,7 @@ import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppProcessosRouteImport } from './routes/_authenticated/_app/processos'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/_app/relatorios'
 import { Route as AuthenticatedAppWhatsappRouteImport } from './routes/_authenticated/_app/whatsapp'
+import { Route as ApiPublicWhatsappOfficeIdRouteImport } from './routes/api/public/whatsapp/$officeId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -183,6 +184,12 @@ const AuthenticatedAppWhatsappRoute =
     path: '/whatsapp',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiPublicWhatsappOfficeIdRoute =
+  ApiPublicWhatsappOfficeIdRouteImport.update({
+    id: '/api/public/whatsapp/$officeId',
+    path: '/api/public/whatsapp/$officeId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/processos': typeof AuthenticatedAppProcessosRoute
   '/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/whatsapp': typeof AuthenticatedAppWhatsappRoute
+  '/api/public/whatsapp/$officeId': typeof ApiPublicWhatsappOfficeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -237,6 +245,7 @@ export interface FileRoutesByTo {
   '/processos': typeof AuthenticatedAppProcessosRoute
   '/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/whatsapp': typeof AuthenticatedAppWhatsappRoute
+  '/api/public/whatsapp/$officeId': typeof ApiPublicWhatsappOfficeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,6 +276,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/processos': typeof AuthenticatedAppProcessosRoute
   '/_authenticated/_app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/_authenticated/_app/whatsapp': typeof AuthenticatedAppWhatsappRoute
+  '/api/public/whatsapp/$officeId': typeof ApiPublicWhatsappOfficeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/processos'
     | '/relatorios'
     | '/whatsapp'
+    | '/api/public/whatsapp/$officeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/processos'
     | '/relatorios'
     | '/whatsapp'
+    | '/api/public/whatsapp/$officeId'
   id:
     | '__root__'
     | '/'
@@ -352,6 +364,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/processos'
     | '/_authenticated/_app/relatorios'
     | '/_authenticated/_app/whatsapp'
+    | '/api/public/whatsapp/$officeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -361,6 +374,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicWhatsappOfficeIdRoute: typeof ApiPublicWhatsappOfficeIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -554,6 +568,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppWhatsappRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/whatsapp/$officeId': {
+      id: '/api/public/whatsapp/$officeId'
+      path: '/api/public/whatsapp/$officeId'
+      fullPath: '/api/public/whatsapp/$officeId'
+      preLoaderRoute: typeof ApiPublicWhatsappOfficeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -624,6 +645,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicWhatsappOfficeIdRoute: ApiPublicWhatsappOfficeIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

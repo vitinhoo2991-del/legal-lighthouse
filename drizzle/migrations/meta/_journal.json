@@ -29,6 +29,13 @@
       "when": 1788908527162,
       "tag": "0003_leads_qualification",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788909545316,
+      "tag": "0004_multiatendimento",
+      "breakpoints": true
     }
   ]
 }

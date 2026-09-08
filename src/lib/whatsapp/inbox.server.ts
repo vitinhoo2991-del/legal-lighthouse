@@ -46,22 +46,40 @@ async function ensureConversation(officeId: string, phone: string, profileName: 
     await db.from("whatsapp_contacts").update({ profile_name: profileName }).eq("id", contactId);
   }
 
+  const columns = "id, status, ai_enabled, unread_count, service_status, assigned_to";
+
   const { data: existingConv } = await db
     .from("whatsapp_conversations")
-    .select("id, status, ai_enabled, unread_count")
+    .select(columns)
     .eq("office_id", officeId)
     .eq("contact_id", contactId)
     .maybeSingle();
 
-  if (existingConv) return { ...existingConv, contactId };
+  if (existingConv) return { ...existingConv, contactId, isNew: false as const };
 
   const { data: conv, error } = await db
     .from("whatsapp_conversations")
     .insert({ office_id: officeId, contact_id: contactId })
-    .select("id, status, ai_enabled, unread_count")
+    .select(columns)
     .single();
   if (error || !conv) throw new Error("CONVERSATION_ERROR");
-  return { ...conv, contactId };
+  return { ...conv, contactId, isNew: true as const };
+}
+
+/** Histórico do atendimento (Etapa 05) gravado pelo servidor. */
+async function recordConversationEvent(
+  officeId: string,
+  conversationId: string,
+  eventType: "reopened" | "status_changed" | "message_sent",
+  description: string,
+) {
+  const db = await admin();
+  await db.from("conversation_events").insert({
+    office_id: officeId,
+    conversation_id: conversationId,
+    event_type: eventType,
+    description,
+  });
 }
 
 function isOutsideHours(settings: any, timezone: string) {
@@ -80,8 +98,12 @@ function isOutsideHours(settings: any, timezone: string) {
     const day = map[parts.find((p) => p.type === "weekday")?.value ?? "Mon"] ?? 1;
     if (!(settings.hours_days ?? []).includes(day)) return true;
     const now = hour * 60 + minute;
-    const [sh, sm] = String(settings.hours_start ?? "09:00").split(":").map(Number);
-    const [eh, em] = String(settings.hours_end ?? "18:00").split(":").map(Number);
+    const [sh, sm] = String(settings.hours_start ?? "09:00")
+      .split(":")
+      .map(Number);
+    const [eh, em] = String(settings.hours_end ?? "18:00")
+      .split(":")
+      .map(Number);
     return now < (sh ?? 0) * 60 + (sm ?? 0) || now > (eh ?? 23) * 60 + (em ?? 59);
   } catch {
     return false;
@@ -130,10 +152,13 @@ export async function sendOutboundText(options: {
         })
         .eq("id", row.id);
     }
-    await db
-      .from("whatsapp_conversations")
-      .update({ last_message_at: new Date().toISOString() })
-      .eq("id", options.conversationId);
+    const patch: {
+      last_message_at: string;
+      service_status?: "aguardando_cliente";
+    } = { last_message_at: new Date().toISOString() };
+    // Etapa 05 — resposta humana coloca a conversa em "aguardando cliente".
+    if (!options.fromAi && options.authorProfileId) patch.service_status = "aguardando_cliente";
+    await db.from("whatsapp_conversations").update(patch).eq("id", options.conversationId);
     return { ok: true as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : "falha no envio";
@@ -147,11 +172,7 @@ export async function sendOutboundText(options: {
   }
 }
 
-async function replyWithAi(options: {
-  officeId: string;
-  conversationId: string;
-  toPhone: string;
-}) {
+async function replyWithAi(options: { officeId: string; conversationId: string; toPhone: string }) {
   const db = await admin();
   const { data: settings } = await db
     .from("ai_agent_settings")
@@ -291,13 +312,57 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         delivered_at: message.timestamp,
       });
 
-      await db
-        .from("whatsapp_conversations")
-        .update({
-          last_message_at: message.timestamp,
-          unread_count: (conversation.unread_count ?? 0) + 1,
-        })
-        .eq("id", conversation.id);
+      // Etapa 05 — fila/status do atendimento e reabertura automática.
+      const wasClosed = conversation.service_status === "encerrada";
+      const nextServiceStatus = wasClosed
+        ? "aberta"
+        : conversation.assigned_to
+          ? "aguardando_equipe"
+          : conversation.service_status === "aguardando_cliente"
+            ? "aguardando_equipe"
+            : conversation.service_status;
+
+      const conversationPatch: {
+        last_message_at: string;
+        unread_count: number;
+        service_status:
+          "aberta" | "aguardando_equipe" | "aguardando_cliente" | "em_atendimento" | "encerrada";
+        status?: "ai" | "human";
+        ai_enabled?: boolean;
+        closed_at?: string | null;
+      } = {
+        last_message_at: message.timestamp,
+        unread_count: (conversation.unread_count ?? 0) + 1,
+        service_status: nextServiceStatus,
+      };
+      if (wasClosed) {
+        conversationPatch["status"] = conversation.assigned_to ? "human" : "ai";
+        conversationPatch["ai_enabled"] = !conversation.assigned_to;
+        conversationPatch["closed_at"] = null;
+      }
+
+      await db.from("whatsapp_conversations").update(conversationPatch).eq("id", conversation.id);
+
+      if (wasClosed) {
+        await recordConversationEvent(
+          officeId,
+          conversation.id,
+          "reopened",
+          "Conversa reaberta por nova mensagem do cliente.",
+        );
+      }
+
+      // Notificação real: nova conversa ou nova mensagem.
+      await db.from("notifications").insert({
+        office_id: officeId,
+        profile_id: conversation.assigned_to ?? null,
+        conversation_id: conversation.id,
+        type: conversation.isNew ? "new_conversation" : "new_message",
+        title: conversation.isNew
+          ? `Nova conversa de ${message.profileName ?? message.from}`
+          : `Nova mensagem de ${message.profileName ?? message.from}`,
+        body: content.slice(0, 160) || null,
+      });
 
       const channel = await getOfficeChannel(officeId);
       const canReply =
@@ -317,9 +382,8 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
       // Etapa 04 — qualificação inteligente sobre a conversa real.
       if (message.type === "text" && content.trim()) {
         try {
-          const { ensureWhatsappLead, qualifyLead } = await import(
-            "@/lib/leads/qualification.server"
-          );
+          const { ensureWhatsappLead, qualifyLead } =
+            await import("@/lib/leads/qualification.server");
           const leadId = await ensureWhatsappLead({
             officeId,
             contactId: conversation.contactId,
@@ -348,10 +412,7 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
             });
           }
         } catch (error) {
-          console.error(
-            "[lead-qualification]",
-            error instanceof Error ? error.message : "erro",
-          );
+          console.error("[lead-qualification]", error instanceof Error ? error.message : "erro");
         }
       }
 

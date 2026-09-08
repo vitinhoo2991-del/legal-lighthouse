@@ -402,63 +402,21 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!conversation) throw new Error("NOT_FOUND");
 
-    const { data: conn } = await ctx.supabase
-      .from("whatsapp_connections")
-      .select("external_phone_number_id, status")
-      .eq("office_id", officeId)
-      .maybeSingle();
+    const { getOfficeChannel, sendOutboundText } = await import("./whatsapp.server");
+    const channel = await getOfficeChannel(officeId);
+    if (!channel) return { ok: false as const, code: "NOT_CONFIGURED" as const };
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: credentials } = await supabaseAdmin
-      .from("whatsapp_credentials")
-      .select("access_token")
-      .eq("office_id", officeId)
-      .maybeSingle();
-
-    if (!conn?.external_phone_number_id || !credentials?.access_token) {
-      return { ok: false as const, code: "NOT_CONFIGURED" as const };
-    }
-
-    const { data: row } = await ctx.supabase
-      .from("whatsapp_messages")
-      .insert({
-        office_id: officeId,
-        conversation_id: data.conversationId,
-        direction: "outbound",
-        message_type: "text",
-        content: data.content,
-        status: "queued",
-        author_profile_id: profileId,
-      })
-      .select("id")
-      .single();
-
-    const { sendTextMessage } = await import("./whatsapp.server");
-    try {
-      const externalId = await sendTextMessage({
-        accessToken: credentials.access_token,
-        phoneNumberId: conn.external_phone_number_id,
-        to: conversation.contact.phone_number,
-        text: data.content,
-      });
-      await ctx.supabase
-        .from("whatsapp_messages")
-        .update({ external_message_id: externalId, status: "sent", sent_at: new Date().toISOString() })
-        .eq("id", row.id);
-      await ctx.supabase
-        .from("whatsapp_conversations")
-        .update({ last_message_at: new Date().toISOString() })
-        .eq("id", data.conversationId);
-      return { ok: true as const };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "falha no envio";
-      await ctx.supabase
-        .from("whatsapp_messages")
-        .update({ status: "failed", error_message: message })
-        .eq("id", row.id);
-      return { ok: false as const, code: "SEND_ERROR" as const, message };
-    }
+    const result = await sendOutboundText({
+      officeId,
+      conversationId: data.conversationId,
+      toPhone: conversation.contact.phone_number,
+      text: data.content,
+      authorProfileId: profileId,
+    });
+    if (result.ok) return { ok: true as const };
+    return { ok: false as const, code: "SEND_ERROR" as const, message: result.message };
   });
+
 
 export const setWhatsappConversationMode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

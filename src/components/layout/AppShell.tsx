@@ -85,7 +85,7 @@ function NavList({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: (
   );
 }
 
-function UserMenu({ profile }: { profile?: Profile | null }) {
+function UserMenu({ profile }: { profile: Profile | null | undefined }) {
   const signOut = useSignOut();
   const navigate = useNavigate();
 

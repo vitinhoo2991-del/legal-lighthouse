@@ -59,6 +59,7 @@ export const navGroups: NavGroup[] = [
     title: "Inteligência",
     items: [
       { label: "IA", to: "/ia", icon: Sparkles },
+      { label: "Atendimento IA", to: "/atendimento-ia", icon: MessagesSquare },
       { label: "Agentes IA", to: "/agentes-ia", icon: Bot },
       { label: "Base de conhecimento", to: "/base-conhecimento", icon: BookOpen },
       { label: "Copiloto", to: "/copiloto", icon: Gavel },

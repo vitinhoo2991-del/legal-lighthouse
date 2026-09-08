@@ -8,6 +8,13 @@
       "when": 1788899343748,
       "tag": "0000_jurisia_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788901987791,
+      "tag": "0001_ai_attendance",
+      "breakpoints": true
     }
   ]
 }

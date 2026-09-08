@@ -14,6 +14,237 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_settings: {
+        Row: {
+          after_hours_message: string
+          agent_name: string
+          behavior: string
+          created_at: string
+          enabled: boolean
+          greeting: string
+          handoff_message: string
+          hours_days: number[]
+          hours_end: string
+          hours_mode: Database["public"]["Enums"]["ai_hours_mode"]
+          hours_start: string
+          id: string
+          model: string
+          objective: string
+          office_id: string
+          rules: string
+          tones: string[]
+          updated_at: string
+        }
+        Insert: {
+          after_hours_message?: string
+          agent_name?: string
+          behavior?: string
+          created_at?: string
+          enabled?: boolean
+          greeting?: string
+          handoff_message?: string
+          hours_days?: number[]
+          hours_end?: string
+          hours_mode?: Database["public"]["Enums"]["ai_hours_mode"]
+          hours_start?: string
+          id?: string
+          model?: string
+          objective?: string
+          office_id: string
+          rules?: string
+          tones?: string[]
+          updated_at?: string
+        }
+        Update: {
+          after_hours_message?: string
+          agent_name?: string
+          behavior?: string
+          created_at?: string
+          enabled?: boolean
+          greeting?: string
+          handoff_message?: string
+          hours_days?: number[]
+          hours_end?: string
+          hours_mode?: Database["public"]["Enums"]["ai_hours_mode"]
+          hours_start?: string
+          id?: string
+          model?: string
+          objective?: string
+          office_id?: string
+          rules?: string
+          tones?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_settings_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: true
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_conversations: {
+        Row: {
+          channel: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          last_message_at: string
+          office_id: string
+          status: Database["public"]["Enums"]["ai_conversation_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string
+          office_id: string
+          status?: Database["public"]["Enums"]["ai_conversation_status"]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string
+          office_id?: string
+          status?: Database["public"]["Enums"]["ai_conversation_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_conversations_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_messages: {
+        Row: {
+          author_profile_id: string | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          office_id: string
+          role: Database["public"]["Enums"]["ai_message_role"]
+        }
+        Insert: {
+          author_profile_id?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          office_id: string
+          role: Database["public"]["Enums"]["ai_message_role"]
+        }
+        Update: {
+          author_profile_id?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          office_id?: string
+          role?: Database["public"]["Enums"]["ai_message_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_author_profile_id_fkey"
+            columns: ["author_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_messages_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage_logs: {
+        Row: {
+          completion_tokens: number | null
+          conversation_id: string | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          model: string
+          office_id: string
+          prompt_tokens: number | null
+          status: string
+          total_tokens: number | null
+        }
+        Insert: {
+          completion_tokens?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          model: string
+          office_id: string
+          prompt_tokens?: number | null
+          status?: string
+          total_tokens?: number | null
+        }
+        Update: {
+          completion_tokens?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          model?: string
+          office_id?: string
+          prompt_tokens?: number | null
+          status?: string
+          total_tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_logs_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -196,6 +427,9 @@ export type Database = {
       }
     }
     Enums: {
+      ai_conversation_status: "ai" | "waiting_human" | "human" | "closed"
+      ai_hours_mode: "always" | "business_hours"
+      ai_message_role: "user" | "assistant" | "system"
       app_role: "owner" | "admin" | "lawyer" | "assistant"
       office_status: "active" | "suspended" | "cancelled"
       profile_status: "active" | "invited" | "inactive"
@@ -326,6 +560,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_conversation_status: ["ai", "waiting_human", "human", "closed"],
+      ai_hours_mode: ["always", "business_hours"],
+      ai_message_role: ["user", "assistant", "system"],
       app_role: ["owner", "admin", "lawyer", "assistant"],
       office_status: ["active", "suspended", "cancelled"],
       profile_status: ["active", "invited", "inactive"],

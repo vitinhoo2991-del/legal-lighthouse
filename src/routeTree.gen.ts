@@ -20,6 +20,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/_app/agenda'
 import { Route as AuthenticatedAppAgentesIaRouteImport } from './routes/_authenticated/_app/agentes-ia'
 import { Route as AuthenticatedAppAtendimentoRouteImport } from './routes/_authenticated/_app/atendimento'
+import { Route as AuthenticatedAppAtendimentoIaRouteImport } from './routes/_authenticated/_app/atendimento-ia'
 import { Route as AuthenticatedAppBaseConhecimentoRouteImport } from './routes/_authenticated/_app/base-conhecimento'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/_app/clientes'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/_app/configuracoes'
@@ -89,6 +90,12 @@ const AuthenticatedAppAtendimentoRoute =
   AuthenticatedAppAtendimentoRouteImport.update({
     id: '/atendimento',
     path: '/atendimento',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppAtendimentoIaRoute =
+  AuthenticatedAppAtendimentoIaRouteImport.update({
+    id: '/atendimento-ia',
+    path: '/atendimento-ia',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppBaseConhecimentoRoute =
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAppAgendaRoute
   '/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/atendimento-ia': typeof AuthenticatedAppAtendimentoIaRoute
   '/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
   '/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -213,6 +221,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAppAgendaRoute
   '/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/atendimento-ia': typeof AuthenticatedAppAtendimentoIaRoute
   '/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/clientes': typeof AuthenticatedAppClientesRoute
   '/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -242,6 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/_app/agentes-ia': typeof AuthenticatedAppAgentesIaRoute
   '/_authenticated/_app/atendimento': typeof AuthenticatedAppAtendimentoRoute
+  '/_authenticated/_app/atendimento-ia': typeof AuthenticatedAppAtendimentoIaRoute
   '/_authenticated/_app/base-conhecimento': typeof AuthenticatedAppBaseConhecimentoRoute
   '/_authenticated/_app/clientes': typeof AuthenticatedAppClientesRoute
   '/_authenticated/_app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/agentes-ia'
     | '/atendimento'
+    | '/atendimento-ia'
     | '/base-conhecimento'
     | '/clientes'
     | '/configuracoes'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/agentes-ia'
     | '/atendimento'
+    | '/atendimento-ia'
     | '/base-conhecimento'
     | '/clientes'
     | '/configuracoes'
@@ -324,6 +336,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/agenda'
     | '/_authenticated/_app/agentes-ia'
     | '/_authenticated/_app/atendimento'
+    | '/_authenticated/_app/atendimento-ia'
     | '/_authenticated/_app/base-conhecimento'
     | '/_authenticated/_app/clientes'
     | '/_authenticated/_app/configuracoes'
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/atendimento'
       fullPath: '/atendimento'
       preLoaderRoute: typeof AuthenticatedAppAtendimentoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/atendimento-ia': {
+      id: '/_authenticated/_app/atendimento-ia'
+      path: '/atendimento-ia'
+      fullPath: '/atendimento-ia'
+      preLoaderRoute: typeof AuthenticatedAppAtendimentoIaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/_app/base-conhecimento': {
@@ -541,6 +561,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
   AuthenticatedAppAgentesIaRoute: typeof AuthenticatedAppAgentesIaRoute
   AuthenticatedAppAtendimentoRoute: typeof AuthenticatedAppAtendimentoRoute
+  AuthenticatedAppAtendimentoIaRoute: typeof AuthenticatedAppAtendimentoIaRoute
   AuthenticatedAppBaseConhecimentoRoute: typeof AuthenticatedAppBaseConhecimentoRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
@@ -562,6 +583,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
   AuthenticatedAppAgentesIaRoute: AuthenticatedAppAgentesIaRoute,
   AuthenticatedAppAtendimentoRoute: AuthenticatedAppAtendimentoRoute,
+  AuthenticatedAppAtendimentoIaRoute: AuthenticatedAppAtendimentoIaRoute,
   AuthenticatedAppBaseConhecimentoRoute: AuthenticatedAppBaseConhecimentoRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,

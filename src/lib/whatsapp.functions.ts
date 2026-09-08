@@ -231,7 +231,22 @@ export const getWhatsappVerifyToken = createServerFn({ method: "GET" })
       .select("verify_token")
       .eq("office_id", officeId)
       .maybeSingle();
-    return { verifyToken: data?.verify_token ?? null };
+    if (data?.verify_token) return { verifyToken: data.verify_token };
+
+    // Gera o token de verificação antes mesmo das credenciais, pois a Meta pede
+    // o webhook (URL + token) antes de o número entrar em produção.
+    const verifyToken = crypto.randomUUID().replace(/-/g, "");
+    const { error } = await supabaseAdmin.from("whatsapp_credentials").upsert(
+      {
+        office_id: officeId,
+        access_token: "",
+        verify_token: verifyToken,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "office_id" },
+    );
+    if (error) return { verifyToken: null };
+    return { verifyToken };
   });
 
 export const testWhatsappConnection = createServerFn({ method: "POST" })

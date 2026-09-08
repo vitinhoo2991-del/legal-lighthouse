@@ -105,7 +105,14 @@ function WhatsappPage() {
 
   const webhookUrl = useMemo(() => {
     if (!overview) return "";
-    const origin = typeof window === "undefined" ? "" : window.location.origin;
+    if (typeof window === "undefined") return overview.webhookPath;
+    const host = window.location.hostname;
+    // Domínios de edição/preview exigem login e a Meta não consegue validá-los.
+    // Nesses casos mostramos a URL pública estável do projeto.
+    const match = host.match(/([0-9a-f-]{36})\.lovableproject\.com$/i);
+    const origin = match
+      ? `https://project--${match[1]}-dev.lovable.app`
+      : window.location.origin;
     return `${origin}${overview.webhookPath}`;
   }, [overview]);
 

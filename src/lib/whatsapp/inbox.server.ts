@@ -314,6 +314,47 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         });
       }
 
+      // Etapa 04 — qualificação inteligente sobre a conversa real.
+      if (message.type === "text" && content.trim()) {
+        try {
+          const { ensureWhatsappLead, qualifyLead } = await import(
+            "@/lib/leads/qualification.server"
+          );
+          const leadId = await ensureWhatsappLead({
+            officeId,
+            contactId: conversation.contactId,
+            conversationId: conversation.id,
+            phone: message.from,
+            profileName: message.profileName,
+          });
+          if (leadId) {
+            const { data: history } = await db
+              .from("whatsapp_messages")
+              .select("direction, content")
+              .eq("office_id", officeId)
+              .eq("conversation_id", conversation.id)
+              .order("created_at", { ascending: true })
+              .limit(40);
+            await qualifyLead({
+              officeId,
+              leadId,
+              conversationId: null,
+              messageMarker: message.externalId,
+              humanHandled: conversation.status === "human",
+              turns: (history ?? []).map((m) => ({
+                role: m.direction === "inbound" ? ("user" as const) : ("assistant" as const),
+                content: m.content,
+              })),
+            });
+          }
+        } catch (error) {
+          console.error(
+            "[lead-qualification]",
+            error instanceof Error ? error.message : "erro",
+          );
+        }
+      }
+
       await finishEvent(message.externalId, null);
     } catch (error) {
       await finishEvent(message.externalId, error instanceof Error ? error.message : "erro");

@@ -293,6 +293,195 @@ export type Database = {
           },
         ]
       }
+      lead_score_history: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string
+          new_score: number
+          office_id: string
+          previous_score: number | null
+          reason: string | null
+          source: Database["public"]["Enums"]["lead_score_source"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id: string
+          new_score: number
+          office_id: string
+          previous_score?: number | null
+          reason?: string | null
+          source?: Database["public"]["Enums"]["lead_score_source"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string
+          new_score?: number
+          office_id?: string
+          previous_score?: number | null
+          reason?: string | null
+          source?: Database["public"]["Enums"]["lead_score_source"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_score_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_score_history_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          ai_conversation_id: string | null
+          assigned_to: string | null
+          budget_signal: string | null
+          case_summary: string | null
+          case_type: string | null
+          contact_id: string | null
+          created_at: string
+          deadline: string | null
+          decision_maker: boolean | null
+          email: string | null
+          has_deadline: boolean | null
+          id: string
+          intent: Database["public"]["Enums"]["lead_intent"]
+          last_interaction_at: string
+          last_qualified_at: string | null
+          last_qualified_message_id: string | null
+          lead_score: number
+          lead_temperature: Database["public"]["Enums"]["lead_temperature"]
+          location: string | null
+          missing_information: string[]
+          name: string | null
+          office_id: string
+          phone: string | null
+          practice_area: string | null
+          practice_area_match: boolean | null
+          qualification_status: Database["public"]["Enums"]["lead_qualification_status"]
+          qualification_summary: string | null
+          score_reason: string | null
+          source: string
+          updated_at: string
+          urgency: Database["public"]["Enums"]["lead_urgency"]
+          whatsapp_conversation_id: string | null
+        }
+        Insert: {
+          ai_conversation_id?: string | null
+          assigned_to?: string | null
+          budget_signal?: string | null
+          case_summary?: string | null
+          case_type?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          decision_maker?: boolean | null
+          email?: string | null
+          has_deadline?: boolean | null
+          id?: string
+          intent?: Database["public"]["Enums"]["lead_intent"]
+          last_interaction_at?: string
+          last_qualified_at?: string | null
+          last_qualified_message_id?: string | null
+          lead_score?: number
+          lead_temperature?: Database["public"]["Enums"]["lead_temperature"]
+          location?: string | null
+          missing_information?: string[]
+          name?: string | null
+          office_id: string
+          phone?: string | null
+          practice_area?: string | null
+          practice_area_match?: boolean | null
+          qualification_status?: Database["public"]["Enums"]["lead_qualification_status"]
+          qualification_summary?: string | null
+          score_reason?: string | null
+          source?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["lead_urgency"]
+          whatsapp_conversation_id?: string | null
+        }
+        Update: {
+          ai_conversation_id?: string | null
+          assigned_to?: string | null
+          budget_signal?: string | null
+          case_summary?: string | null
+          case_type?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          decision_maker?: boolean | null
+          email?: string | null
+          has_deadline?: boolean | null
+          id?: string
+          intent?: Database["public"]["Enums"]["lead_intent"]
+          last_interaction_at?: string
+          last_qualified_at?: string | null
+          last_qualified_message_id?: string | null
+          lead_score?: number
+          lead_temperature?: Database["public"]["Enums"]["lead_temperature"]
+          location?: string | null
+          missing_information?: string[]
+          name?: string | null
+          office_id?: string
+          phone?: string | null
+          practice_area?: string | null
+          practice_area_match?: boolean | null
+          qualification_status?: Database["public"]["Enums"]["lead_qualification_status"]
+          qualification_summary?: string | null
+          score_reason?: string | null
+          source?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["lead_urgency"]
+          whatsapp_conversation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_ai_conversation_id_fkey"
+            columns: ["ai_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_whatsapp_conversation_id_fkey"
+            columns: ["whatsapp_conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offices: {
         Row: {
           address: string | null
@@ -738,6 +927,17 @@ export type Database = {
       ai_hours_mode: "always" | "business_hours"
       ai_message_role: "user" | "assistant" | "system"
       app_role: "owner" | "admin" | "lawyer" | "assistant"
+      lead_intent: "desconhecida" | "informacao" | "avaliando" | "contratar"
+      lead_qualification_status:
+        | "novo"
+        | "em_qualificacao"
+        | "qualificado"
+        | "incompleto"
+        | "desqualificado"
+        | "atendimento_humano"
+      lead_score_source: "ai" | "user" | "system"
+      lead_temperature: "frio" | "morno" | "quente"
+      lead_urgency: "desconhecida" | "baixa" | "media" | "alta" | "critica"
       office_status: "active" | "suspended" | "cancelled"
       profile_status: "active" | "invited" | "inactive"
       whatsapp_connection_status:
@@ -883,6 +1083,18 @@ export const Constants = {
       ai_hours_mode: ["always", "business_hours"],
       ai_message_role: ["user", "assistant", "system"],
       app_role: ["owner", "admin", "lawyer", "assistant"],
+      lead_intent: ["desconhecida", "informacao", "avaliando", "contratar"],
+      lead_qualification_status: [
+        "novo",
+        "em_qualificacao",
+        "qualificado",
+        "incompleto",
+        "desqualificado",
+        "atendimento_humano",
+      ],
+      lead_score_source: ["ai", "user", "system"],
+      lead_temperature: ["frio", "morno", "quente"],
+      lead_urgency: ["desconhecida", "baixa", "media", "alta", "critica"],
       office_status: ["active", "suspended", "cancelled"],
       profile_status: ["active", "invited", "inactive"],
       whatsapp_connection_status: [

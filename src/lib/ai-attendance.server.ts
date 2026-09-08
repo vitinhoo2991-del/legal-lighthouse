@@ -133,3 +133,43 @@ export function buildInstructions(cfg: PersonaConfig): string {
     .filter(Boolean)
     .join("\n");
 }
+
+/**
+ * Chamada estruturada ao mesmo gateway/modelo real da Etapa 02.
+ * Usada pela camada de qualificação: pede JSON e devolve o objeto já parseado.
+ */
+export async function generateStructuredJson(options: {
+  model: string;
+  instructions: string;
+  input: string;
+}): Promise<{ data: unknown } & Omit<AiReply, "text">> {
+  const reply = await generateAssistantReply({
+    model: options.model,
+    instructions: `${options.instructions}\n\nResponda EXCLUSIVAMENTE com um objeto JSON válido, sem markdown, sem comentários e sem texto fora do JSON.`,
+    turns: [{ role: "user", content: options.input }],
+  });
+
+  const cleaned = reply.text
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/, "")
+    .trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new AiProviderError(502, "resposta sem JSON");
+
+  let data: unknown;
+  try {
+    data = JSON.parse(cleaned.slice(start, end + 1));
+  } catch {
+    throw new AiProviderError(502, "JSON inválido");
+  }
+
+  return {
+    data,
+    model: reply.model,
+    promptTokens: reply.promptTokens,
+    completionTokens: reply.completionTokens,
+    totalTokens: reply.totalTokens,
+    durationMs: reply.durationMs,
+  };
+}

@@ -302,6 +302,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       .eq("office_id", officeId);
 
     if (conversation.status !== "ai") {
+      await runQualification(ctx, officeId, data.conversationId, true, userMessage.id);
       return { userMessage: userMessage as AiMessage, assistantMessage: null, aiSkipped: "human" as const };
     }
 
@@ -364,6 +365,8 @@ export const sendMessage = createServerFn({ method: "POST" })
         .eq("id", data.conversationId)
         .eq("office_id", officeId);
 
+      await runQualification(ctx, officeId, data.conversationId, false, assistantMessage?.id ?? null);
+
       return {
         userMessage: userMessage as AiMessage,
         assistantMessage: assistantMessage as AiMessage,
@@ -386,3 +389,57 @@ export const sendMessage = createServerFn({ method: "POST" })
       return { userMessage: userMessage as AiMessage, assistantMessage: null, aiSkipped: code };
     }
   });
+
+/**
+ * Etapa 04 — qualifica o lead vinculado à conversa de atendimento da IA.
+ * Nunca interrompe o atendimento: falhas são apenas registradas.
+ */
+async function runQualification(
+  ctx: Ctx,
+  officeId: string,
+  conversationId: string,
+  humanHandled: boolean,
+  marker: string | null,
+) {
+  try {
+    const { data: conv } = await ctx.supabase
+      .from("ai_conversations")
+      .select("contact_name")
+      .eq("id", conversationId)
+      .eq("office_id", officeId)
+      .maybeSingle();
+
+    const { ensureAiConversationLead, qualifyLead } = await import(
+      "@/lib/leads/qualification.server"
+    );
+    const leadId = await ensureAiConversationLead({
+      officeId,
+      conversationId,
+      contactName: (conv?.contact_name as string | null) ?? null,
+    });
+    if (!leadId) return;
+
+    const { data: history } = await ctx.supabase
+      .from("ai_messages")
+      .select("role, content")
+      .eq("office_id", officeId)
+      .eq("conversation_id", conversationId)
+      .in("role", ["user", "assistant"])
+      .order("created_at", { ascending: true })
+      .limit(40);
+
+    await qualifyLead({
+      officeId,
+      leadId,
+      conversationId,
+      messageMarker: marker,
+      humanHandled,
+      turns: ((history ?? []) as { role: "user" | "assistant"; content: string }[]).map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    });
+  } catch (error) {
+    console.error("[lead-qualification]", error instanceof Error ? error.message : "erro");
+  }
+}

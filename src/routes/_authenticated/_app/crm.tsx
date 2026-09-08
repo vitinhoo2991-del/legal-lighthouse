@@ -322,7 +322,7 @@ function CrmPage() {
         <SearchInput
           placeholder="Buscar por nome, telefone, e-mail ou título"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={setSearch}
         />
         <Select value={stageFilter} onValueChange={setStageFilter}>
           <SelectTrigger className="w-[190px]">
@@ -647,7 +647,7 @@ function CreateOpportunityDialog(props: {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="nenhum">Sem lead vinculado</SelectItem>
-                {(leadsQuery.data ?? []).map((lead) => (
+                {(leadsQuery.data ?? []).map((lead: any) => (
                   <SelectItem key={lead.id} value={lead.id}>
                     {lead.name ?? lead.phone ?? "Lead"} · score {lead.lead_score}
                   </SelectItem>
@@ -1048,7 +1048,7 @@ function OpportunitySheet(props: {
               {(detail.data?.tasks ?? []).length === 0 && (
                 <p className="text-xs text-muted-foreground">Nenhuma tarefa registrada.</p>
               )}
-              {(detail.data?.tasks ?? []).map((task) => {
+              {(detail.data?.tasks ?? []).map((task: any) => {
                 const overdue =
                   task.due_at &&
                   new Date(task.due_at).getTime() < Date.now() &&
@@ -1193,7 +1193,7 @@ function OpportunitySheet(props: {
                 <p className="text-xs text-muted-foreground">Nenhuma atividade registrada.</p>
               ) : (
                 <ul className="space-y-2">
-                  {(detail.data?.activities ?? []).map((activity) => (
+                  {(detail.data?.activities ?? []).map((activity: any) => (
                     <li
                       key={activity.id}
                       className="rounded-lg border border-border bg-background/40 p-3 text-xs"
@@ -1218,7 +1218,7 @@ function OpportunitySheet(props: {
                 <p className="text-xs text-muted-foreground">Sem movimentações registradas.</p>
               ) : (
                 <ul className="space-y-2">
-                  {(detail.data?.history ?? []).map((item) => (
+                  {(detail.data?.history ?? []).map((item: any) => (
                     <li key={item.id} className="text-xs text-muted-foreground">
                       {new Date(item.created_at).toLocaleString("pt-BR")} — {item.description}
                     </li>

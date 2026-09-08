@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CalendarCheck, Sparkles, UserRound, Users } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { CalendarCheck, MessagesSquare, Sparkles, UserRound, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard, PlaceholderPanel } from "@/components/common/StatCard";
 import { EmptyState } from "@/components/common/states";
+import { Button } from "@/components/ui/button";
 import { useProfile } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/_app/dashboard")({
@@ -36,9 +37,21 @@ function DashboardPage() {
       </div>
 
       <EmptyState
-        title="Seu escritório ainda não recebeu contatos."
-        description="Assim que o atendimento for conectado, novos leads e conversas aparecerão automaticamente aqui."
+        icon={<MessagesSquare className="h-5 w-5" />}
+        title="Seu escritório ainda não recebeu contatos"
+        description="Conecte seu WhatsApp ou comece a cadastrar seus primeiros leads para acompanhar seus atendimentos por aqui."
+        action={
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button asChild className="w-full sm:w-auto">
+              <Link to="/whatsapp">Conectar WhatsApp</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full sm:w-auto">
+              <Link to="/leads">Cadastrar leads</Link>
+            </Button>
+          </div>
+        }
       />
+
 
       <div className="grid gap-4 lg:grid-cols-2">
         <PlaceholderPanel

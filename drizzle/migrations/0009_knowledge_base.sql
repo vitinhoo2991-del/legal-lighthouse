@@ -10,6 +10,7 @@ create table public.knowledge_items (
   tags text[] not null default '{}',
   enabled boolean not null default true,
   priority integer not null default 50,
+  version integer not null default 1,
   source_document_id uuid references public.documents(id) on delete set null,
   created_by uuid references public.profiles(id),
   updated_by uuid references public.profiles(id),
@@ -19,7 +20,8 @@ create table public.knowledge_items (
   deleted_by uuid references public.profiles(id),
   constraint knowledge_items_title_length check (char_length(title) between 1 and 180),
   constraint knowledge_items_content_length check (char_length(content) between 1 and 30000),
-  constraint knowledge_items_priority_range check (priority between 0 and 100)
+  constraint knowledge_items_priority_range check (priority between 0 and 100),
+  constraint knowledge_items_version_positive check (version >= 1)
 );
 
 create index knowledge_items_office_enabled_idx on public.knowledge_items(office_id, enabled, priority desc, updated_at desc);

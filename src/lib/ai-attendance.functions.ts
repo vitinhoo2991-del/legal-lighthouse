@@ -318,6 +318,15 @@ export const sendMessage = createServerFn({ method: "POST" })
     const { generateAssistantReply, buildInstructions, AiNotConfiguredError, AiProviderError } =
       await import("./ai-attendance.server");
 
+    // Etapa 09 — contexto da base de conhecimento do próprio escritório.
+    const { getKnowledgeContext } = await import("./knowledge/retrieval.server");
+    const knowledge = await getKnowledgeContext({
+      supabase: ctx.supabase,
+      officeId,
+      query: data.content,
+      log: { conversationId: data.conversationId, createdByProfileId: profileId, source: "ai" },
+    });
+
     const instructions = buildInstructions({
       agentName: settings.agent_name,
       officeName,
@@ -328,6 +337,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       handoffMessage: settings.handoff_message,
       outsideHours: isOutsideHours(settings, timezone),
       afterHoursMessage: settings.after_hours_message,
+      knowledgeContext: knowledge.context,
     });
 
     try {

@@ -106,10 +106,13 @@ export interface PersonaConfig {
   handoffMessage: string;
   outsideHours: boolean;
   afterHoursMessage: string;
+  /** Etapa 09 — conteúdo da base de conhecimento do escritório, quando houver. */
+  knowledgeContext?: string;
 }
 
 export function buildInstructions(cfg: PersonaConfig): string {
   const tones = cfg.tones.length ? cfg.tones.join(", ") : "profissional";
+  const knowledge = (cfg.knowledgeContext ?? "").trim();
   return [
     `Você é ${cfg.agentName}, assistente virtual de atendimento do escritório de advocacia "${cfg.officeName}".`,
     `Tom de atendimento: ${tones}. Responda sempre em português do Brasil, com mensagens curtas e claras.`,
@@ -118,6 +121,19 @@ export function buildInstructions(cfg: PersonaConfig): string {
     cfg.rules ? `Regras internas do escritório: ${cfg.rules}` : "",
     "",
     "TRIAGEM: entenda o motivo do contato, faça apenas perguntas relevantes (uma ou duas por vez), colete as informações iniciais necessárias e evite perguntas desnecessárias. Conduza uma conversa natural, sem roteiro rígido.",
+    "",
+    knowledge
+      ? [
+          "BASE DE CONHECIMENTO DO ESCRITÓRIO (conteúdo oficial, prioritário):",
+          knowledge,
+          "",
+          "COMO USAR A BASE DE CONHECIMENTO:",
+          "- Priorize essas informações oficiais sobre qualquer suposição sua.",
+          "- Use apenas o que estiver escrito acima; não complete lacunas com invenções.",
+          "- Nunca afirme que algo consta na base do escritório se não estiver no conteúdo acima.",
+          "- Se a base não responder à dúvida, diga com naturalidade que vai confirmar com a equipe.",
+        ].join("\n")
+      : "",
     "",
     "LIMITES OBRIGATÓRIOS:",
     "- Você NÃO é advogado(a). Se perguntarem, deixe claro que é uma assistente virtual do escritório.",

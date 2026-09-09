@@ -92,6 +92,14 @@ type ViewMode = "dia" | "semana" | "mes" | "lista";
 const WEEKDAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const NONE = "__none__";
 
+const HISTORY_LABEL: Record<string, string> = {
+  "calendar.event_created": "criou o compromisso",
+  "calendar.event_updated": "atualizou o compromisso",
+  "calendar.event_rescheduled": "reagendou o compromisso",
+  "calendar.event_status_changed": "alterou o status",
+  "calendar.event_cancelled": "cancelou o compromisso",
+};
+
 const STATUS_STYLE: Record<EventStatus, string> = {
   agendado: "border-border text-foreground/80",
   confirmado: "border-primary/40 bg-primary-soft text-primary",
@@ -888,7 +896,8 @@ function EventSheet({
                 <ul className="mt-2 space-y-2">
                   {data.history.map((h: any) => (
                     <li key={h.id} className="rounded-lg border border-border bg-surface/60 p-3 text-xs">
-                      <span className="font-medium">{h.actor_name ?? "Sistema"}</span> — {h.action}
+                      <span className="font-medium">{h.actor_name ?? "Sistema"}</span>{" "}
+                      {HISTORY_LABEL[h.action] ?? h.action}
                       <span className="block text-muted-foreground">
                         {formatDateTime(h.created_at, timezone)}
                       </span>

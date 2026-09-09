@@ -86,6 +86,19 @@ function cleanTags(tags: string[]) {
   return [...new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 20);
 }
 
+/** Busca tolerante: combina os termos digitados com "or" em vez de exigir a frase inteira. */
+function toSearchExpression(raw: string) {
+  const tokens = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length >= 3);
+  return [...new Set(tokens)].slice(0, 8).join(" or ");
+}
+
+
 /** Erros técnicos ficam no log do servidor; o cliente recebe apenas um código tratável. */
 function throwDatabaseError(error: unknown, fallback: string): never {
   const message =
@@ -200,7 +213,7 @@ export const listKnowledgeItems = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const ctx = context as unknown as Ctx;
     const { officeId, role } = await getOffice(ctx);
-    const term = (data.search ?? "").trim();
+    const term = toSearchExpression(data.search ?? "");
     const limit = data.limit ?? 100;
 
     let rows: any[] = [];

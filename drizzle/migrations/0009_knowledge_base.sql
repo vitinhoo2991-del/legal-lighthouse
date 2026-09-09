@@ -60,6 +60,7 @@ create or replace function public.set_knowledge_item_updated_at()
 returns trigger language plpgsql as $$
 begin
   new.updated_at = now();
+  new.version = old.version + 1;
   return new;
 end;
 $$;

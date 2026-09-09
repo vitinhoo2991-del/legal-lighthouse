@@ -23,6 +23,14 @@ export interface MetaProviderConfig {
   verifyToken: string | null;
 }
 
+export interface WhatsAppInboundMedia {
+  bytes: ArrayBuffer;
+  mimeType: string;
+  filename: string | null;
+  sha256: string | null;
+  sizeBytes: number;
+}
+
 async function graph<T>(path: string, accessToken: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${GRAPH_BASE}${path}`, {
     ...init,
@@ -88,6 +96,31 @@ export class MetaWhatsAppProvider implements WhatsAppProvider {
     };
   }
 
+  /** Baixa uma mídia recebida sem expor o token fora do provider Meta. */
+  async downloadMedia(mediaId: string, filename?: string | null): Promise<WhatsAppInboundMedia> {
+    const info = await graph<{ url?: string; mime_type?: string; sha256?: string }>(
+      `/${encodeURIComponent(mediaId)}`,
+      this.config.accessToken,
+    );
+    if (!info.url) throw new WhatsAppError(502, "mídia sem URL de download");
+
+    const response = await fetch(info.url, {
+      headers: { Authorization: `Bearer ${this.config.accessToken}` },
+    });
+    if (!response.ok) {
+      throw new WhatsAppError(response.status, `falha ao baixar mídia (${response.status})`);
+    }
+
+    const bytes = await response.arrayBuffer();
+    return {
+      bytes,
+      mimeType: info.mime_type || response.headers.get("content-type")?.split(";")[0] || "application/octet-stream",
+      filename: filename ?? null,
+      sha256: info.sha256 ?? null,
+      sizeBytes: bytes.byteLength,
+    };
+  }
+
   verifyWebhookChallenge(query: URLSearchParams): string | null {
     const mode = query.get("hub.mode");
     const token = query.get("hub.verify_token");
@@ -142,14 +175,23 @@ export class MetaWhatsAppProvider implements WhatsAppProvider {
                         "",
                     )
                   : "";
+
+          const media = m[type] as Record<string, any> | undefined;
+          const mediaId = media?.id ? String(media.id) : null;
+          const mediaFilename = media?.filename ? String(media.filename) : null;
+          const mediaMimeType = media?.mime_type ? String(media.mime_type) : null;
+          const mediaSha256 = media?.sha256 ? String(media.sha256) : null;
+          const caption = media?.caption ? String(media.caption) : "";
+
           inbound.push({
             externalId: String(m["id"]),
             from: String(m["from"] ?? ""),
             profileName,
             type,
-            text,
+            text: text || caption,
             timestamp: new Date(Number(m["timestamp"] ?? Date.now() / 1000) * 1000).toISOString(),
-          });
+            ...(mediaId ? { mediaId, mediaFilename, mediaMimeType, mediaSha256 } : {}),
+          } as WhatsAppInboundMessage);
         }
         for (const s of value.statuses ?? []) {
           statuses.push({

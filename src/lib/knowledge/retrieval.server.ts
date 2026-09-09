@@ -79,6 +79,8 @@ export async function getKnowledgeContext(options: {
 }): Promise<KnowledgeContext> {
   const term = normalizeQuery(options.query ?? "");
   if (!term || !options.officeId) return EMPTY;
+  const expression = buildSearchExpression(term);
+  if (!expression) return EMPTY;
   const limit = Math.min(Math.max(options.limit ?? 5, 1), 12);
 
   let items: KnowledgeMatch[] = [];
@@ -89,7 +91,7 @@ export async function getKnowledgeContext(options: {
       .eq("office_id", options.officeId)
       .eq("enabled", true)
       .is("deleted_at", null)
-      .textSearch("search_vector", term, { type: "websearch", config: "portuguese" })
+      .textSearch("search_vector", expression, { type: "websearch", config: "portuguese" })
       .order("priority", { ascending: false })
       .order("updated_at", { ascending: false })
       .limit(limit);

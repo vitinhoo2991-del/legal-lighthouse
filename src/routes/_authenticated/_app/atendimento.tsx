@@ -1,6 +1,7 @@
 // Etapa 05 — Central de Multiatendimento (fila, atribuição, transferência,
 // notas internas, histórico, IA ↔ humano e tempo real).
 import { useEffect, useMemo, useRef, useState } from "react";
+import { UpcomingEvents } from "@/components/calendar/UpcomingEvents";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -733,6 +734,14 @@ function AtendimentoPage() {
                 >
                   <X className="mr-2 h-4 w-4" /> Encerrar atendimento
                 </Button>
+              </div>
+
+              <div className="rounded-xl border border-border bg-surface/60 p-3">
+                <UpcomingEvents
+                  conversationId={detail.id}
+                  title="Agendar atendimento"
+                  eventType="atendimento"
+                />
               </div>
 
               {detail.notes.length > 0 ? (

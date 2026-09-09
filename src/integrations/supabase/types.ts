@@ -293,6 +293,263 @@ export type Database = {
           },
         ]
       }
+      calendar_event_participants: {
+        Row: {
+          created_at: string
+          event_id: string
+          external_email: string | null
+          external_name: string | null
+          external_phone: string | null
+          id: string
+          office_id: string
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          external_email?: string | null
+          external_name?: string | null
+          external_phone?: string | null
+          id?: string
+          office_id: string
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          external_email?: string | null
+          external_name?: string | null
+          external_phone?: string | null
+          id?: string
+          office_id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_event_participants_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_event_participants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_events: {
+        Row: {
+          all_day: boolean
+          assigned_to: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_at: string
+          event_type: Database["public"]["Enums"]["calendar_event_type"]
+          id: string
+          is_deadline: boolean
+          lead_id: string | null
+          location: string | null
+          meeting_url: string | null
+          office_id: string
+          opportunity_id: string | null
+          priority: Database["public"]["Enums"]["calendar_priority"]
+          process_reference: string | null
+          start_at: string
+          status: Database["public"]["Enums"]["calendar_event_status"]
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          all_day?: boolean
+          assigned_to?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at: string
+          event_type?: Database["public"]["Enums"]["calendar_event_type"]
+          id?: string
+          is_deadline?: boolean
+          lead_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          office_id: string
+          opportunity_id?: string | null
+          priority?: Database["public"]["Enums"]["calendar_priority"]
+          process_reference?: string | null
+          start_at: string
+          status?: Database["public"]["Enums"]["calendar_event_status"]
+          title: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          all_day?: boolean
+          assigned_to?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at?: string
+          event_type?: Database["public"]["Enums"]["calendar_event_type"]
+          id?: string
+          is_deadline?: boolean
+          lead_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          office_id?: string
+          opportunity_id?: string | null
+          priority?: Database["public"]["Enums"]["calendar_priority"]
+          process_reference?: string | null
+          start_at?: string
+          status?: Database["public"]["Enums"]["calendar_event_status"]
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_reminders: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          minutes_before: number
+          office_id: string
+          profile_id: string | null
+          remind_at: string
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          minutes_before?: number
+          office_id: string
+          profile_id?: string | null
+          remind_at: string
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          minutes_before?: number
+          office_id?: string
+          profile_id?: string | null
+          remind_at?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_reminders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reminders_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_reminders_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_assignments: {
         Row: {
           assigned_at: string
@@ -1110,6 +1367,7 @@ export type Database = {
           body: string | null
           conversation_id: string | null
           created_at: string
+          event_id: string | null
           id: string
           lead_id: string | null
           office_id: string
@@ -1124,6 +1382,7 @@ export type Database = {
           body?: string | null
           conversation_id?: string | null
           created_at?: string
+          event_id?: string | null
           id?: string
           lead_id?: string | null
           office_id: string
@@ -1138,6 +1397,7 @@ export type Database = {
           body?: string | null
           conversation_id?: string | null
           created_at?: string
+          event_id?: string | null
           id?: string
           lead_id?: string | null
           office_id?: string
@@ -1154,6 +1414,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
             referencedColumns: ["id"]
           },
           {
@@ -1652,6 +1919,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calendar_check_conflict: {
+        Args: {
+          _assigned_to: string
+          _end_at: string
+          _ignore_event_id?: string
+          _office_id: string
+          _start_at: string
+        }
+        Returns: {
+          end_at: string
+          id: string
+          start_at: string
+          title: string
+        }[]
+      }
+      calendar_create_event: {
+        Args: { _allow_conflict?: boolean; _payload: Json }
+        Returns: Json
+      }
       current_office_id: { Args: never; Returns: string }
       has_office_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -1663,6 +1949,25 @@ export type Database = {
       ai_hours_mode: "always" | "business_hours"
       ai_message_role: "user" | "assistant" | "system"
       app_role: "owner" | "admin" | "lawyer" | "assistant"
+      calendar_event_status:
+        | "agendado"
+        | "confirmado"
+        | "em_andamento"
+        | "concluido"
+        | "cancelado"
+        | "nao_compareceu"
+      calendar_event_type:
+        | "consulta"
+        | "reuniao"
+        | "atendimento"
+        | "audiencia"
+        | "retorno"
+        | "ligacao"
+        | "videoconferencia"
+        | "prazo"
+        | "tarefa"
+        | "outro"
+      calendar_priority: "baixa" | "media" | "alta" | "urgente"
       conversation_event_type:
         | "assumed"
         | "transferred"
@@ -1720,6 +2025,10 @@ export type Database = {
         | "task_assigned"
         | "task_due_soon"
         | "task_overdue"
+        | "event_assigned"
+        | "event_updated"
+        | "event_cancelled"
+        | "event_reminder"
       office_status: "active" | "suspended" | "cancelled"
       profile_status: "active" | "invited" | "inactive"
       whatsapp_connection_status:
@@ -1865,6 +2174,27 @@ export const Constants = {
       ai_hours_mode: ["always", "business_hours"],
       ai_message_role: ["user", "assistant", "system"],
       app_role: ["owner", "admin", "lawyer", "assistant"],
+      calendar_event_status: [
+        "agendado",
+        "confirmado",
+        "em_andamento",
+        "concluido",
+        "cancelado",
+        "nao_compareceu",
+      ],
+      calendar_event_type: [
+        "consulta",
+        "reuniao",
+        "atendimento",
+        "audiencia",
+        "retorno",
+        "ligacao",
+        "videoconferencia",
+        "prazo",
+        "tarefa",
+        "outro",
+      ],
+      calendar_priority: ["baixa", "media", "alta", "urgente"],
       conversation_event_type: [
         "assumed",
         "transferred",
@@ -1927,6 +2257,10 @@ export const Constants = {
         "task_assigned",
         "task_due_soon",
         "task_overdue",
+        "event_assigned",
+        "event_updated",
+        "event_cancelled",
+        "event_reminder",
       ],
       office_status: ["active", "suspended", "cancelled"],
       profile_status: ["active", "invited", "inactive"],

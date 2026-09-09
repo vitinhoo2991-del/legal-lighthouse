@@ -177,11 +177,11 @@ export class MetaWhatsAppProvider implements WhatsAppProvider {
                   : "";
 
           const media = m[type] as Record<string, any> | undefined;
-          const mediaId = media?.id ? String(media.id) : null;
-          const mediaFilename = media?.filename ? String(media.filename) : null;
-          const mediaMimeType = media?.mime_type ? String(media.mime_type) : null;
-          const mediaSha256 = media?.sha256 ? String(media.sha256) : null;
-          const caption = media?.caption ? String(media.caption) : "";
+          const mediaId = media?.["id"] ? String(media["id"]) : null;
+          const mediaFilename = media?.["filename"] ? String(media["filename"]) : null;
+          const mediaMimeType = media?.["mime_type"] ? String(media["mime_type"]) : null;
+          const mediaSha256 = media?.["sha256"] ? String(media["sha256"]) : null;
+          const caption = media?.["caption"] ? String(media["caption"]) : "";
 
           inbound.push({
             externalId: String(m["id"]),

@@ -173,6 +173,17 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
   if (!turns.length) return;
 
   const { generateAssistantReply, buildInstructions } = await import("../ai-attendance.server");
+
+  // Etapa 09 — base de conhecimento do escritório (somente conteúdo ativo do próprio office).
+  const { getKnowledgeContext } = await import("../knowledge/retrieval.server");
+  const lastInbound = [...turns].reverse().find((t) => t.role === "user")?.content ?? "";
+  const knowledge = await getKnowledgeContext({
+    supabase: db,
+    officeId: options.officeId,
+    query: lastInbound,
+    log: { conversationId: options.conversationId, source: "whatsapp" },
+  });
+
   const instructions = buildInstructions({
     agentName: settings.agent_name,
     officeName: office?.name ?? "Escritório",
@@ -183,6 +194,7 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
     handoffMessage: settings.handoff_message,
     outsideHours: isOutsideHours(settings, office?.timezone ?? "America/Sao_Paulo"),
     afterHoursMessage: settings.after_hours_message,
+    knowledgeContext: knowledge.context,
   });
 
   const started = Date.now();

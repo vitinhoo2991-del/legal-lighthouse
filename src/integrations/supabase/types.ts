@@ -1456,6 +1456,230 @@ export type Database = {
           },
         ]
       }
+      knowledge_item_versions: {
+        Row: {
+          changed_by: string | null
+          content: string
+          content_type: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at: string
+          enabled: boolean
+          id: string
+          knowledge_item_id: string
+          office_id: string
+          priority: number
+          source_document_id: string | null
+          tags: string[]
+          title: string
+          version: number
+        }
+        Insert: {
+          changed_by?: string | null
+          content: string
+          content_type: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at?: string
+          enabled: boolean
+          id?: string
+          knowledge_item_id: string
+          office_id: string
+          priority: number
+          source_document_id?: string | null
+          tags?: string[]
+          title: string
+          version: number
+        }
+        Update: {
+          changed_by?: string | null
+          content?: string
+          content_type?: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          knowledge_item_id?: string
+          office_id?: string
+          priority?: number
+          source_document_id?: string | null
+          tags?: string[]
+          title?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_item_versions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_item_versions_knowledge_item_id_fkey"
+            columns: ["knowledge_item_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_item_versions_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_item_versions_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_items: {
+        Row: {
+          content: string
+          content_type: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          enabled: boolean
+          id: string
+          office_id: string
+          priority: number
+          search_vector: unknown
+          source_document_id: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          content: string
+          content_type?: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          enabled?: boolean
+          id?: string
+          office_id: string
+          priority?: number
+          search_vector?: unknown
+          source_document_id?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          content?: string
+          content_type?: Database["public"]["Enums"]["knowledge_content_type"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          enabled?: boolean
+          id?: string
+          office_id?: string
+          priority?: number
+          search_vector?: unknown
+          source_document_id?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_items_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_items_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_items_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_items_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_search_logs: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_item_ids: string[]
+          office_id: string
+          query: string
+          result_count: number
+          source: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          matched_item_ids?: string[]
+          office_id: string
+          query: string
+          result_count?: number
+          source?: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          matched_item_ids?: string[]
+          office_id?: string
+          query?: string
+          result_count?: number
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_search_logs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_search_logs_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_score_history: {
         Row: {
           created_at: string
@@ -2226,6 +2450,24 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      knowledge_search: {
+        Args: { _limit?: number; _only_enabled?: boolean; _query: string }
+        Returns: {
+          content: string
+          content_type: Database["public"]["Enums"]["knowledge_content_type"]
+          enabled: boolean
+          id: string
+          priority: number
+          rank: number
+          tags: string[]
+          title: string
+          updated_at: string
+        }[]
+      }
+      knowledge_search_document: {
+        Args: { _content: string; _tags: string[]; _title: string }
+        Returns: unknown
+      }
     }
     Enums: {
       ai_conversation_status: "ai" | "waiting_human" | "human" | "closed"
@@ -2295,6 +2537,13 @@ export type Database = {
         | "processado"
         | "falha"
         | "requer_ocr"
+      knowledge_content_type:
+        | "faq"
+        | "orientacao"
+        | "procedimento"
+        | "politica"
+        | "modelo"
+        | "outro"
       lead_intent: "desconhecida" | "informacao" | "avaliando" | "contratar"
       lead_qualification_status:
         | "novo"
@@ -2539,6 +2788,14 @@ export const Constants = {
         "processado",
         "falha",
         "requer_ocr",
+      ],
+      knowledge_content_type: [
+        "faq",
+        "orientacao",
+        "procedimento",
+        "politica",
+        "modelo",
+        "outro",
       ],
       lead_intent: ["desconhecida", "informacao", "avaliando", "contratar"],
       lead_qualification_status: [

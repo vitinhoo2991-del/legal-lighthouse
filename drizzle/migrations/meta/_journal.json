@@ -64,6 +64,34 @@
       "when": 1788912432345,
       "tag": "0008_documents_ai",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788918911088,
+      "tag": "0009_knowledge_items_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788918949893,
+      "tag": "0010_knowledge_versions_and_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788918987813,
+      "tag": "0011_knowledge_search_vector",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1788919010662,
+      "tag": "0012_knowledge_search_rpc",
+      "breakpoints": true
     }
   ]
 }

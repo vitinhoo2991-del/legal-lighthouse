@@ -1,14 +1,18 @@
 // Persistência da caixa de entrada do WhatsApp — agnóstica de provedor.
 // Recebe eventos já normalizados pelo WhatsAppService.
+import { createHash } from "crypto";
 import { admin, getOfficeChannel } from "./service.server";
 import type { WhatsAppWebhookEvents } from "./types";
+
+const DOCUMENT_BUCKET = "documents";
+const MAX_AUTO_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const AUTO_DOCUMENT_EXTENSIONS = new Set(["pdf", "docx", "txt", "jpg", "jpeg", "png"]);
 
 async function recordEvent(officeId: string, externalEventId: string, eventType: string) {
   const db = await admin();
   const { error } = await db
     .from("whatsapp_webhook_events")
     .insert({ office_id: officeId, external_event_id: externalEventId, event_type: eventType });
-  // Violação de unicidade => já processado (idempotência).
   return !error;
 }
 
@@ -47,14 +51,12 @@ async function ensureConversation(officeId: string, phone: string, profileName: 
   }
 
   const columns = "id, status, ai_enabled, unread_count, service_status, assigned_to";
-
   const { data: existingConv } = await db
     .from("whatsapp_conversations")
     .select(columns)
     .eq("office_id", officeId)
     .eq("contact_id", contactId)
     .maybeSingle();
-
   if (existingConv) return { ...existingConv, contactId, isNew: false as const };
 
   const { data: conv, error } = await db
@@ -66,7 +68,6 @@ async function ensureConversation(officeId: string, phone: string, profileName: 
   return { ...conv, contactId, isNew: true as const };
 }
 
-/** Histórico do atendimento (Etapa 05) gravado pelo servidor. */
 async function recordConversationEvent(
   officeId: string,
   conversationId: string,
@@ -98,19 +99,14 @@ function isOutsideHours(settings: any, timezone: string) {
     const day = map[parts.find((p) => p.type === "weekday")?.value ?? "Mon"] ?? 1;
     if (!(settings.hours_days ?? []).includes(day)) return true;
     const now = hour * 60 + minute;
-    const [sh, sm] = String(settings.hours_start ?? "09:00")
-      .split(":")
-      .map(Number);
-    const [eh, em] = String(settings.hours_end ?? "18:00")
-      .split(":")
-      .map(Number);
+    const [sh, sm] = String(settings.hours_start ?? "09:00").split(":").map(Number);
+    const [eh, em] = String(settings.hours_end ?? "18:00").split(":").map(Number);
     return now < (sh ?? 0) * 60 + (sm ?? 0) || now > (eh ?? 23) * 60 + (em ?? 59);
   } catch {
     return false;
   }
 }
 
-/** Envia texto pelo canal do escritório e registra a mensagem outbound. */
 export async function sendOutboundText(options: {
   officeId: string;
   conversationId: string;
@@ -137,56 +133,32 @@ export async function sendOutboundText(options: {
 
   try {
     const { WhatsAppService } = await import("./service.server");
-    const externalId = await WhatsAppService.sendText(
-      options.officeId,
-      options.toPhone,
-      options.text,
-    );
+    const externalId = await WhatsAppService.sendText(options.officeId, options.toPhone, options.text);
     if (row) {
       await db
         .from("whatsapp_messages")
-        .update({
-          external_message_id: externalId,
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        })
+        .update({ external_message_id: externalId, status: "sent", sent_at: new Date().toISOString() })
         .eq("id", row.id);
     }
-    const patch: {
-      last_message_at: string;
-      service_status?: "aguardando_cliente";
-    } = { last_message_at: new Date().toISOString() };
-    // Etapa 05 — resposta humana coloca a conversa em "aguardando cliente".
+    const patch: { last_message_at: string; service_status?: "aguardando_cliente" } = {
+      last_message_at: new Date().toISOString(),
+    };
     if (!options.fromAi && options.authorProfileId) patch.service_status = "aguardando_cliente";
     await db.from("whatsapp_conversations").update(patch).eq("id", options.conversationId);
     return { ok: true as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : "falha no envio";
-    if (row) {
-      await db
-        .from("whatsapp_messages")
-        .update({ status: "failed", error_message: message })
-        .eq("id", row.id);
-    }
+    if (row) await db.from("whatsapp_messages").update({ status: "failed", error_message: message }).eq("id", row.id);
     return { ok: false as const, message };
   }
 }
 
 async function replyWithAi(options: { officeId: string; conversationId: string; toPhone: string }) {
   const db = await admin();
-  const { data: settings } = await db
-    .from("ai_agent_settings")
-    .select("*")
-    .eq("office_id", options.officeId)
-    .maybeSingle();
+  const { data: settings } = await db.from("ai_agent_settings").select("*").eq("office_id", options.officeId).maybeSingle();
   if (!settings?.enabled) return;
 
-  const { data: office } = await db
-    .from("offices")
-    .select("name, timezone")
-    .eq("id", options.officeId)
-    .maybeSingle();
-
+  const { data: office } = await db.from("offices").select("name, timezone").eq("id", options.officeId).maybeSingle();
   const { data: history } = await db
     .from("whatsapp_messages")
     .select("direction, content")
@@ -194,13 +166,10 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
     .eq("message_type", "text")
     .order("created_at", { ascending: true })
     .limit(40);
-
-  const turns = (history ?? [])
-    .filter((m) => m.content)
-    .map((m) => ({
-      role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
-      content: m.content,
-    }));
+  const turns = (history ?? []).filter((m) => m.content).map((m) => ({
+    role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
+    content: m.content,
+  }));
   if (!turns.length) return;
 
   const { generateAssistantReply, buildInstructions } = await import("../ai-attendance.server");
@@ -219,11 +188,7 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
   const started = Date.now();
   let reply;
   try {
-    reply = await generateAssistantReply({
-      model: settings.model || "openai/gpt-6-astra",
-      instructions,
-      turns,
-    });
+    reply = await generateAssistantReply({ model: settings.model || "openai/gpt-6-astra", instructions, turns });
   } catch {
     await db.from("ai_usage_logs").insert({
       office_id: options.officeId,
@@ -241,7 +206,6 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
     text: reply.text,
     fromAi: true,
   });
-
   await db.from("ai_usage_logs").insert({
     office_id: options.officeId,
     model: reply.model,
@@ -251,6 +215,134 @@ async function replyWithAi(options: { officeId: string; conversationId: string; 
     duration_ms: reply.durationMs,
     status: "success",
   });
+}
+
+function extensionFromFilename(filename: string | null, mimeType: string): string | null {
+  const ext = filename?.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  if (AUTO_DOCUMENT_EXTENSIONS.has(ext)) return ext;
+  const byMime: Record<string, string> = {
+    "application/pdf": "pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "text/plain": "txt",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+  };
+  return byMime[mimeType.toLowerCase()] ?? null;
+}
+
+function safeFilename(filename: string | null, extension: string) {
+  const base = (filename ?? `documento.${extension}`)
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .slice(0, 180);
+  return base.toLowerCase().endsWith(`.${extension}`) ? base : `${base}.${extension}`;
+}
+
+/**
+ * Arquivos suportados enviados pelo cliente via WhatsApp são arquivados
+ * automaticamente no módulo Documentos. A análise por IA continua manual.
+ */
+async function autoArchiveWhatsAppMedia(options: {
+  officeId: string;
+  conversationId: string;
+  contactId: string;
+  messageExternalId: string;
+  profileName: string | null;
+  mediaId: string;
+  filename: string | null;
+  mimeType: string | null;
+  sha256: string | null;
+  caption: string;
+}) {
+  const channel = await getOfficeChannel(options.officeId);
+  if (!channel) return { saved: false as const, reason: "WHATSAPP_NOT_CONFIGURED" };
+
+  const downloader = (channel.provider as unknown as {
+    downloadMedia?: (mediaId: string, filename?: string | null) => Promise<{
+      bytes: ArrayBuffer;
+      mimeType: string;
+      filename: string | null;
+      sha256: string | null;
+      sizeBytes: number;
+    }>;
+  }).downloadMedia;
+  if (!downloader) return { saved: false as const, reason: "MEDIA_DOWNLOAD_UNSUPPORTED" };
+
+  const media = await downloader.call(channel.provider, options.mediaId, options.filename);
+  const mimeType = options.mimeType || media.mimeType || "application/octet-stream";
+  const extension = extensionFromFilename(options.filename || media.filename, mimeType);
+  if (!extension) return { saved: false as const, reason: "UNSUPPORTED_TYPE" };
+  if (media.sizeBytes > MAX_AUTO_DOCUMENT_BYTES) return { saved: false as const, reason: "FILE_TOO_LARGE" };
+
+  const checksum = media.sha256 || options.sha256 || createHash("sha256").update(Buffer.from(media.bytes)).digest("hex");
+  const db = await admin();
+  const { data: duplicate } = await db
+    .from("documents")
+    .select("id")
+    .eq("office_id", options.officeId)
+    .eq("checksum", checksum)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (duplicate?.id) return { saved: true as const, documentId: duplicate.id, duplicate: true as const };
+
+  const originalName = safeFilename(options.filename || media.filename, extension);
+  const storagePath = `${options.officeId}/whatsapp/${options.conversationId}/${options.messageExternalId}-${originalName}`;
+  const { error: uploadError } = await db.storage.from(DOCUMENT_BUCKET).upload(storagePath, Buffer.from(media.bytes), {
+    contentType: mimeType,
+    upsert: false,
+  });
+  if (uploadError) throw new Error(`DOCUMENT_STORAGE_ERROR:${uploadError.message}`);
+
+  const caption = options.caption.trim();
+  const { data: inserted, error: insertError } = await db
+    .from("documents")
+    .insert({
+      office_id: options.officeId,
+      storage_path: storagePath,
+      original_name: originalName,
+      name: originalName,
+      extension,
+      mime_type: mimeType,
+      size_bytes: media.sizeBytes,
+      checksum,
+      category: "outros",
+      description: caption || null,
+      contact_id: options.contactId,
+      conversation_id: options.conversationId,
+      processing_status: "aguardando",
+      analysis_status: "nao_analisado",
+      metadata: {
+        origin: "whatsapp",
+        source: "whatsapp",
+        whatsapp_message_id: options.messageExternalId,
+        whatsapp_media_id: options.mediaId,
+        received_from: options.profileName,
+        caption: caption || null,
+        auto_saved: true,
+      },
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !inserted) {
+    await db.storage.from(DOCUMENT_BUCKET).remove([storagePath]);
+    throw new Error(`DOCUMENT_CREATE_ERROR:${insertError?.message ?? "unknown"}`);
+  }
+
+  await db.from("audit_logs").insert({
+    office_id: options.officeId,
+    actor_profile_id: null,
+    action: "document.auto_saved_from_whatsapp",
+    entity: "documents",
+    entity_id: inserted.id,
+    metadata: {
+      conversation_id: options.conversationId,
+      whatsapp_message_id: options.messageExternalId,
+      original_name: originalName,
+      size_bytes: media.sizeBytes,
+    },
+  });
+
+  return { saved: true as const, documentId: inserted.id, duplicate: false as const };
 }
 
 export async function processInboundEvents(officeId: string, events: WhatsAppWebhookEvents) {
@@ -281,11 +373,7 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         patch.error_message = status.errorMessage ?? "falha reportada pelo WhatsApp";
       }
       if (Object.keys(patch).length) {
-        await db
-          .from("whatsapp_messages")
-          .update(patch)
-          .eq("office_id", officeId)
-          .eq("external_message_id", status.externalId);
+        await db.from("whatsapp_messages").update(patch).eq("office_id", officeId).eq("external_message_id", status.externalId);
       }
       await finishEvent(eventId, null);
     } catch (error) {
@@ -297,11 +385,9 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
     if (!(await recordEvent(officeId, message.externalId, `message.${message.type}`))) continue;
     try {
       const conversation = await ensureConversation(officeId, message.from, message.profileName);
-      const content =
-        message.text ||
-        (message.type === "text" ? "" : `[mensagem do tipo ${message.type} recebida]`);
+      const content = message.text || (message.type === "text" ? "" : `[mensagem do tipo ${message.type} recebida]`);
 
-      await db.from("whatsapp_messages").insert({
+      const { error: messageInsertError } = await db.from("whatsapp_messages").insert({
         office_id: officeId,
         conversation_id: conversation.id,
         external_message_id: message.externalId,
@@ -311,8 +397,8 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         status: "delivered",
         delivered_at: message.timestamp,
       });
+      if (messageInsertError) throw new Error("MESSAGE_CREATE_ERROR");
 
-      // Etapa 05 — fila/status do atendimento e reabertura automática.
       const wasClosed = conversation.service_status === "encerrada";
       const nextServiceStatus = wasClosed
         ? "aberta"
@@ -325,8 +411,7 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
       const conversationPatch: {
         last_message_at: string;
         unread_count: number;
-        service_status:
-          "aberta" | "aguardando_equipe" | "aguardando_cliente" | "em_atendimento" | "encerrada";
+        service_status: "aberta" | "aguardando_equipe" | "aguardando_cliente" | "em_atendimento" | "encerrada";
         status?: "ai" | "human";
         ai_enabled?: boolean;
         closed_at?: string | null;
@@ -336,54 +421,56 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
         service_status: nextServiceStatus,
       };
       if (wasClosed) {
-        conversationPatch["status"] = conversation.assigned_to ? "human" : "ai";
-        conversationPatch["ai_enabled"] = !conversation.assigned_to;
-        conversationPatch["closed_at"] = null;
+        conversationPatch.status = conversation.assigned_to ? "human" : "ai";
+        conversationPatch.ai_enabled = !conversation.assigned_to;
+        conversationPatch.closed_at = null;
       }
-
       await db.from("whatsapp_conversations").update(conversationPatch).eq("id", conversation.id);
 
       if (wasClosed) {
-        await recordConversationEvent(
-          officeId,
-          conversation.id,
-          "reopened",
-          "Conversa reaberta por nova mensagem do cliente.",
-        );
+        await recordConversationEvent(officeId, conversation.id, "reopened", "Conversa reaberta por nova mensagem do cliente.");
       }
 
-      // Notificação real: nova conversa ou nova mensagem.
       await db.from("notifications").insert({
         office_id: officeId,
         profile_id: conversation.assigned_to ?? null,
         conversation_id: conversation.id,
         type: conversation.isNew ? "new_conversation" : "new_message",
-        title: conversation.isNew
-          ? `Nova conversa de ${message.profileName ?? message.from}`
-          : `Nova mensagem de ${message.profileName ?? message.from}`,
+        title: conversation.isNew ? `Nova conversa de ${message.profileName ?? message.from}` : `Nova mensagem de ${message.profileName ?? message.from}`,
         body: content.slice(0, 160) || null,
       });
 
-      const channel = await getOfficeChannel(officeId);
-      const canReply =
-        conversation.status === "ai" &&
-        conversation.ai_enabled &&
-        message.type === "text" &&
-        Boolean(channel);
+      // Etapa 08 — anexo suportado recebido do WhatsApp é arquivado automaticamente.
+      if (message.mediaId) {
+        try {
+          await autoArchiveWhatsAppMedia({
+            officeId,
+            conversationId: conversation.id,
+            contactId: conversation.contactId,
+            messageExternalId: message.externalId,
+            profileName: message.profileName,
+            mediaId: message.mediaId,
+            filename: message.mediaFilename ?? null,
+            mimeType: message.mediaMimeType ?? null,
+            sha256: message.mediaSha256 ?? null,
+            caption: message.text ?? "",
+          });
+        } catch (error) {
+          // O anexo não deve impedir a entrega da mensagem nem a IA.
+          console.error("[whatsapp:document-auto-save]", error instanceof Error ? error.message : "erro");
+        }
+      }
 
+      const channel = await getOfficeChannel(officeId);
+      const canReply = conversation.status === "ai" && conversation.ai_enabled && message.type === "text" && Boolean(channel);
       if (canReply) {
-        await replyWithAi({
-          officeId,
-          conversationId: conversation.id,
-          toPhone: message.from,
-        });
+        await replyWithAi({ officeId, conversationId: conversation.id, toPhone: message.from });
       }
 
       // Etapa 04 — qualificação inteligente sobre a conversa real.
       if (message.type === "text" && content.trim()) {
         try {
-          const { ensureWhatsappLead, qualifyLead } =
-            await import("@/lib/leads/qualification.server");
+          const { ensureWhatsappLead, qualifyLead } = await import("@/lib/leads/qualification.server");
           const leadId = await ensureWhatsappLead({
             officeId,
             contactId: conversation.contactId,
@@ -422,8 +509,5 @@ export async function processInboundEvents(officeId: string, events: WhatsAppWeb
     }
   }
 
-  await db
-    .from("whatsapp_connections")
-    .update({ last_sync_at: new Date().toISOString() })
-    .eq("office_id", officeId);
+  await db.from("whatsapp_connections").update({ last_sync_at: new Date().toISOString() }).eq("office_id", officeId);
 }

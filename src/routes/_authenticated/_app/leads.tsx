@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { UpcomingEvents } from "@/components/calendar/UpcomingEvents";
+import { DocumentsSection } from "@/components/documents/DocumentsSection";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -740,6 +741,10 @@ function LeadDetailSheet({
                 title="Agendar atendimento"
                 eventType="consulta"
               />
+            </section>
+
+            <section className="rounded-xl border border-border bg-surface/60 p-4">
+              <DocumentsSection leadId={lead.id} />
             </section>
 
 

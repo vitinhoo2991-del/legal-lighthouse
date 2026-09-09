@@ -196,6 +196,7 @@ export type Database = {
           completion_tokens: number | null
           conversation_id: string | null
           created_at: string
+          document_id: string | null
           duration_ms: number | null
           id: string
           model: string
@@ -208,6 +209,7 @@ export type Database = {
           completion_tokens?: number | null
           conversation_id?: string | null
           created_at?: string
+          document_id?: string | null
           duration_ms?: number | null
           id?: string
           model: string
@@ -220,6 +222,7 @@ export type Database = {
           completion_tokens?: number | null
           conversation_id?: string | null
           created_at?: string
+          document_id?: string | null
           duration_ms?: number | null
           id?: string
           model?: string
@@ -234,6 +237,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
           {
@@ -1173,6 +1183,279 @@ export type Database = {
           },
         ]
       }
+      document_ai_analyses: {
+        Row: {
+          answer: string | null
+          completed_at: string | null
+          completion_tokens: number | null
+          created_at: string
+          document_id: string
+          duration_ms: number | null
+          error_message: string | null
+          estimated_cost: number | null
+          id: string
+          kind: Database["public"]["Enums"]["document_analysis_kind"]
+          model: string
+          office_id: string
+          prompt_tokens: number | null
+          prompt_version: string | null
+          question: string | null
+          requested_by: string | null
+          result: Json | null
+          status: string
+          total_tokens: number | null
+        }
+        Insert: {
+          answer?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          document_id: string
+          duration_ms?: number | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["document_analysis_kind"]
+          model: string
+          office_id: string
+          prompt_tokens?: number | null
+          prompt_version?: string | null
+          question?: string | null
+          requested_by?: string | null
+          result?: Json | null
+          status?: string
+          total_tokens?: number | null
+        }
+        Update: {
+          answer?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          created_at?: string
+          document_id?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["document_analysis_kind"]
+          model?: string
+          office_id?: string
+          prompt_tokens?: number | null
+          prompt_version?: string | null
+          question?: string | null
+          requested_by?: string | null
+          result?: Json | null
+          status?: string
+          total_tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_ai_analyses_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_ai_analyses_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_ai_analyses_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_texts: {
+        Row: {
+          char_count: number
+          content: string
+          created_at: string
+          document_id: string
+          office_id: string
+          pages: Json
+        }
+        Insert: {
+          char_count?: number
+          content: string
+          created_at?: string
+          document_id: string
+          office_id: string
+          pages?: Json
+        }
+        Update: {
+          char_count?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          office_id?: string
+          pages?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_texts_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: true
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_texts_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          analysis_status: Database["public"]["Enums"]["document_analysis_status"]
+          category: string
+          char_count: number | null
+          checksum: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          extension: string
+          id: string
+          lead_id: string | null
+          metadata: Json
+          mime_type: string
+          name: string
+          office_id: string
+          opportunity_id: string | null
+          original_name: string
+          page_count: number | null
+          process_reference: string | null
+          processing_error: string | null
+          processing_status: Database["public"]["Enums"]["document_processing_status"]
+          size_bytes: number
+          storage_path: string
+          updated_at: string
+          uploaded_by: string | null
+          version: number
+        }
+        Insert: {
+          analysis_status?: Database["public"]["Enums"]["document_analysis_status"]
+          category?: string
+          char_count?: number | null
+          checksum?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          extension: string
+          id?: string
+          lead_id?: string | null
+          metadata?: Json
+          mime_type: string
+          name: string
+          office_id: string
+          opportunity_id?: string | null
+          original_name: string
+          page_count?: number | null
+          process_reference?: string | null
+          processing_error?: string | null
+          processing_status?: Database["public"]["Enums"]["document_processing_status"]
+          size_bytes: number
+          storage_path: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+        }
+        Update: {
+          analysis_status?: Database["public"]["Enums"]["document_analysis_status"]
+          category?: string
+          char_count?: number | null
+          checksum?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          extension?: string
+          id?: string
+          lead_id?: string | null
+          metadata?: Json
+          mime_type?: string
+          name?: string
+          office_id?: string
+          opportunity_id?: string | null
+          original_name?: string
+          page_count?: number | null
+          process_reference?: string | null
+          processing_error?: string | null
+          processing_status?: Database["public"]["Enums"]["document_processing_status"]
+          size_bytes?: number
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_score_history: {
         Row: {
           created_at: string
@@ -2000,6 +2283,18 @@ export type Database = {
         | "tarefa"
       crm_stage_kind: "aberta" | "ganha" | "perdida"
       crm_task_priority: "baixa" | "media" | "alta" | "urgente"
+      document_analysis_kind: "analise" | "pergunta"
+      document_analysis_status:
+        | "nao_analisado"
+        | "analisando"
+        | "analisado"
+        | "falha"
+      document_processing_status:
+        | "aguardando"
+        | "processando"
+        | "processado"
+        | "falha"
+        | "requer_ocr"
       lead_intent: "desconhecida" | "informacao" | "avaliando" | "contratar"
       lead_qualification_status:
         | "novo"
@@ -2231,6 +2526,20 @@ export const Constants = {
       ],
       crm_stage_kind: ["aberta", "ganha", "perdida"],
       crm_task_priority: ["baixa", "media", "alta", "urgente"],
+      document_analysis_kind: ["analise", "pergunta"],
+      document_analysis_status: [
+        "nao_analisado",
+        "analisando",
+        "analisado",
+        "falha",
+      ],
+      document_processing_status: [
+        "aguardando",
+        "processando",
+        "processado",
+        "falha",
+        "requer_ocr",
+      ],
       lead_intent: ["desconhecida", "informacao", "avaliando", "contratar"],
       lead_qualification_status: [
         "novo",

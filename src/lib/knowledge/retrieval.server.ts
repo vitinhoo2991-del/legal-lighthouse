@@ -24,6 +24,30 @@ function normalizeQuery(query: string): string {
   return query.replace(/\s+/g, " ").trim().slice(0, 300);
 }
 
+// Palavras muito comuns não ajudam a encontrar o conteúdo certo.
+const STOPWORDS = new Set([
+  "qual","quais","como","onde","quando","quem","que","por","para","com","sem","dos","das","de","do","da",
+  "os","as","um","uma","uns","umas","voce","voces","vcs","eu","meu","minha","seu","sua","ser","tem","ter",
+  "sobre","pode","posso","gostaria","queria","favor","ola","oi","bom","boa","dia","tarde","noite","obrigado",
+]);
+
+/**
+ * Transforma a frase do cliente numa expressão de busca tolerante:
+ * termos relevantes combinados com "or", em vez de exigir a frase inteira.
+ */
+function buildSearchExpression(term: string): string {
+  const tokens = term
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length >= 3 && !STOPWORDS.has(token));
+  const unique = [...new Set(tokens)].slice(0, 8);
+  return unique.length ? unique.join(" or ") : "";
+}
+
+
 function buildContext(items: KnowledgeMatch[]): string {
   if (!items.length) return "";
   return items

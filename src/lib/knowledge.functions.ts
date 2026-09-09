@@ -52,6 +52,14 @@ function cleanTags(tags: string[]) {
   return [...new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 20);
 }
 
+function throwDatabaseError(error: unknown, fallback: string): never {
+  const message = error && typeof error === "object" && "message" in error ? String((error as { message?: unknown }).message) : "";
+  const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+  console.error(`[Knowledge] ${fallback}`, { code, message });
+  if (code === "42P01") throw new Error("KNOWLEDGE_TABLE_MISSING");
+  throw new Error(fallback);
+}
+
 const itemSchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().trim().min(1).max(180),
@@ -85,7 +93,7 @@ export const listKnowledgeItems = createServerFn({ method: "GET" })
     if (data.type) query = query.eq("content_type", data.type);
     if (typeof data.enabled === "boolean") query = query.eq("enabled", data.enabled);
     const { data: rows, error } = await query;
-    if (error) throw new Error("LIST_ERROR");
+    if (error) throwDatabaseError(error, "LIST_ERROR");
     return (rows ?? []) as KnowledgeItem[];
   });
 
@@ -102,7 +110,7 @@ export const getKnowledgeItem = createServerFn({ method: "GET" })
       .eq("office_id", officeId)
       .is("deleted_at", null)
       .maybeSingle();
-    if (error) throw new Error("GET_ERROR");
+    if (error) throwDatabaseError(error, "GET_ERROR");
     if (!row) throw new Error("NOT_FOUND");
     return row as KnowledgeItem;
   });
@@ -126,14 +134,16 @@ export const saveKnowledgeItem = createServerFn({ method: "POST" })
     };
 
     if (data.id) {
-      const { data: current } = await ctx.supabase
+      const { data: current, error: currentError } = await ctx.supabase
         .from("knowledge_items")
         .select("*")
         .eq("id", data.id)
         .eq("office_id", officeId)
         .is("deleted_at", null)
         .maybeSingle();
+      if (currentError) throwDatabaseError(currentError, "GET_ERROR");
       if (!current) throw new Error("NOT_FOUND");
+
       const { data: saved, error } = await ctx.supabase
         .from("knowledge_items")
         .update(payload)
@@ -141,11 +151,15 @@ export const saveKnowledgeItem = createServerFn({ method: "POST" })
         .eq("office_id", officeId)
         .select("*")
         .single();
-      if (error) throw new Error("SAVE_ERROR");
-      await ctx.supabase.from("knowledge_item_versions").insert({
+      if (error) throwDatabaseError(error, "SAVE_ERROR");
+
+      // O trigger do banco é a única fonte da verdade para versionamento.
+      // Inserimos a versão retornada pelo registro já atualizado, evitando corrida
+      // entre cliente e banco e evitando conflito de UNIQUE(knowledge_item_id, version).
+      const { error: versionError } = await ctx.supabase.from("knowledge_item_versions").insert({
         office_id: officeId,
         knowledge_item_id: data.id,
-        version: Number(current.version ?? 1) + 1,
+        version: Number(saved.version ?? current.version ?? 1),
         title: saved.title,
         content: saved.content,
         content_type: saved.content_type,
@@ -154,14 +168,17 @@ export const saveKnowledgeItem = createServerFn({ method: "POST" })
         priority: saved.priority,
         changed_by: profileId,
       });
-      await ctx.supabase.from("audit_logs").insert({
+      if (versionError) throwDatabaseError(versionError, "VERSION_ERROR");
+
+      const { error: auditError } = await ctx.supabase.from("audit_logs").insert({
         office_id: officeId,
         actor_profile_id: profileId,
         action: "knowledge_item_updated",
         entity: "knowledge_items",
         entity_id: data.id,
-        metadata: { title: saved.title },
+        metadata: { title: saved.title, version: saved.version },
       });
+      if (auditError) throwDatabaseError(auditError, "AUDIT_ERROR");
       return saved as KnowledgeItem;
     }
 
@@ -170,11 +187,12 @@ export const saveKnowledgeItem = createServerFn({ method: "POST" })
       .insert({ ...payload, office_id: officeId, created_by: profileId })
       .select("*")
       .single();
-    if (error) throw new Error("CREATE_ERROR");
-    await ctx.supabase.from("knowledge_item_versions").insert({
+    if (error) throwDatabaseError(error, "CREATE_ERROR");
+
+    const { error: versionError } = await ctx.supabase.from("knowledge_item_versions").insert({
       office_id: officeId,
       knowledge_item_id: saved.id,
-      version: 1,
+      version: Number(saved.version ?? 1),
       title: saved.title,
       content: saved.content,
       content_type: saved.content_type,
@@ -183,14 +201,17 @@ export const saveKnowledgeItem = createServerFn({ method: "POST" })
       priority: saved.priority,
       changed_by: profileId,
     });
-    await ctx.supabase.from("audit_logs").insert({
+    if (versionError) throwDatabaseError(versionError, "VERSION_ERROR");
+
+    const { error: auditError } = await ctx.supabase.from("audit_logs").insert({
       office_id: officeId,
       actor_profile_id: profileId,
       action: "knowledge_item_created",
       entity: "knowledge_items",
       entity_id: saved.id,
-      metadata: { title: saved.title },
+      metadata: { title: saved.title, version: saved.version },
     });
+    if (auditError) throwDatabaseError(auditError, "AUDIT_ERROR");
     return saved as KnowledgeItem;
   });
 
@@ -207,7 +228,7 @@ export const deleteKnowledgeItem = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .eq("office_id", officeId)
       .is("deleted_at", null);
-    if (error) throw new Error("DELETE_ERROR");
+    if (error) throwDatabaseError(error, "DELETE_ERROR");
     await ctx.supabase.from("audit_logs").insert({
       office_id: officeId,
       actor_profile_id: profileId,
@@ -233,7 +254,7 @@ export const toggleKnowledgeItem = createServerFn({ method: "POST" })
       .is("deleted_at", null)
       .select("*")
       .single();
-    if (error) throw new Error("UPDATE_ERROR");
+    if (error) throwDatabaseError(error, "UPDATE_ERROR");
     await ctx.supabase.from("audit_logs").insert({
       office_id: officeId,
       actor_profile_id: profileId,
@@ -257,7 +278,7 @@ export const listKnowledgeVersions = createServerFn({ method: "GET" })
       .eq("knowledge_item_id", data.id)
       .eq("office_id", officeId)
       .order("version", { ascending: false });
-    if (error) throw new Error("VERSIONS_ERROR");
+    if (error) throwDatabaseError(error, "VERSIONS_ERROR");
     return rows ?? [];
   });
 
@@ -283,7 +304,8 @@ export async function getKnowledgeContext(options: {
     .order("updated_at", { ascending: false })
     .limit(limit);
   if (clauses.length) query = query.or(clauses.join(","));
-  const { data: rows } = await query;
+  const { data: rows, error } = await query;
+  if (error) throwDatabaseError(error, "CONTEXT_ERROR");
   const items = (rows ?? []) as Array<{ id: string; title: string; content: string; content_type: string; tags: string[]; priority: number }>;
   const context = items
     .map((item, index) => `FONTE INTERNA ${index + 1} — ${item.title}\nTipo: ${item.content_type}\nConteúdo: ${item.content}`)

@@ -1,6 +1,6 @@
 // Provider-agnostic WhatsApp contracts.
-// Nenhum detalhe da Meta pode vazar deste arquivo: telas, IA, CRM e demais
-// módulos do JurisIA só conhecem estes tipos.
+// Nenhum detalhe da Meta pode vazar deste arquivo: telas, conversas, IA, leads, CRM e documentos
+// só conhecem estes tipos.
 
 export type WhatsAppProviderId = "meta_cloud" | "qrcode";
 
@@ -26,6 +26,11 @@ export interface WhatsAppInboundMessage {
   type: string;
   text: string;
   timestamp: string;
+  /** Metadados opcionais de mídia; o provider específico decide como baixá-la. */
+  mediaId?: string | null;
+  mediaFilename?: string | null;
+  mediaMimeType?: string | null;
+  mediaSha256?: string | null;
 }
 
 export interface WhatsAppStatusUpdate {
@@ -50,19 +55,14 @@ export interface WhatsAppWebhookRequest {
  * Contrato que qualquer transporte de WhatsApp precisa cumprir.
  * Hoje existe apenas a implementação oficial via token (Meta Cloud API).
  * Uma futura implementação por QR Code deve implementar esta mesma interface,
- * sem exigir mudança em telas, conversas, IA, leads ou CRM.
+ * sem exigir mudança em telas, conversas, IA, leads, CRM ou documentos.
  */
 export interface WhatsAppProvider {
   readonly id: WhatsAppProviderId;
-  /** Envia texto para um contato. */
   sendText(message: WhatsAppOutboundText): Promise<WhatsAppSendResult>;
-  /** Consulta o canal (número/nome) — usado no teste de conexão. */
   getChannelInfo(): Promise<WhatsAppChannelInfo>;
-  /** Handshake de verificação do webhook, quando o transporte usa webhook. */
   verifyWebhookChallenge(query: URLSearchParams): string | null;
-  /** Autentica o payload recebido. */
   verifyWebhookRequest(request: WhatsAppWebhookRequest): boolean;
-  /** Normaliza o payload do transporte para o formato interno. */
   parseWebhookPayload(payload: unknown): WhatsAppWebhookEvents;
 }
 
